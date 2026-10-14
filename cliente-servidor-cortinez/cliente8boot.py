@@ -14,14 +14,14 @@ def funcion_cliente():
         print("Conectado al servidor")
            
         # Bucle para enviar mensajes diferentes y verlos en consola alternados 
-        for texto in range(5):
+        for texto in range(100):
             hora_actual = time.strftime("%H:%M:%S") # Guardo la hora en un formato que me sirva para mosstrar diferentes mensajes
             msg = f"{SUPERROJO}[{hora_actual}] soy el boot 5 > este es el mensaje {texto}\n{RESET}"
             s.send(msg.encode('utf-8')) 
 
             msg = s.recv(1024).decode('utf-8')
             print(msg)
-            time.sleep(0.9) # Tiempo entre mensajes
+            time.sleep(8) # Tiempo entre mensajes
 
     except ConnectionRefusedError:
         print("No se pudo conectar al servidor(sevidor rechazo la conexion)")

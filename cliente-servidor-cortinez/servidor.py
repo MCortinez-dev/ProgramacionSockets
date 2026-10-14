@@ -29,7 +29,7 @@ def manejar_cliente(conn, addr, lista_clientes):
                 conn.send(respuesta.encode('utf-8'))
                 continue
             
-            print(f"{VERDE}[{addr}] dice: {mensaje}{RESET}")
+            print(f"\n{VERDE}[{addr}] dice:\n {mensaje}{RESET}")
             
             # Eco: devuelve el mensaje al cliente
             conn.send(f"{VERDE}Eco: {mensaje}{RESET}".encode('utf-8'))
