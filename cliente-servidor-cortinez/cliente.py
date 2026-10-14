@@ -4,12 +4,12 @@
 import socket
 import time
 
-SUPER-MAGENTA = "\033[95m"
+SUPERMAGENTA = "\033[1;4;44;95m" # negrira - fondo azul - subrayado - magenta brillante
 RESET = "\033[0m"
 
 def funcion_cliente():
     host = "127.0.0.1"
-    port = 500007
+    port = 49152
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
     
@@ -19,12 +19,21 @@ def funcion_cliente():
         # Bucle para enviar mensajes diferentes y verlos en consola alternados 
         for texto in range(5):
             hora_actual = time.strftime("%H:%M:%S") # Guardo la hora en un formato que me sirva para mosstrar diferentes mensajes
-            msg = f"{SUPER-MAGENTA}[{hora_actual}] soy el boot 1 > este es el mensaje {texto}\n{RESET}"
-            s.send(msg.encode('utf-8')) 
+            
+            cosas_tipeadas = input("> ")
 
-            msg = s.recv(1024).decode('utf-8')
-            print(msg)
-            time.sleep(0.1) # Tiempo entre mensajes
+            if msg.strip().lower() == "exitOK":
+                s.send(msg.encode('utf-8'))
+                break
+
+            msg = f"{SUPERMAGENTA}[{hora_actual}] Soy un cliente que ingresa datos por el teclado [para dejar de escribir = /adios] > este es el mensaje {cosas_tipeadas}\n{RESET}"
+
+            s.send(msg.encode('utf-8'))             
+
+            recivido = s.recv(1024).decode('utf-8')
+            
+            print(recivido)
+            # time.sleep(1.5) # Tiempo entre mensajes
 
     except ConnectionRefusedError:
         print("No se pudo conectar al servidor(sevidor rechazo la conexion)")

@@ -14,6 +14,11 @@ def manejar_cliente(conn, addr, lista_clientes):
             mensaje = conn.recv(1024).decode('utf-8') # Recibe hasta 1024 bytes de datos desde el socket del cliente y los decodifica de bytes a texto (string)
             if not mensaje:
                 break
+
+            if mensaje.strip().lower() == "/users":
+                respuesta = f"[SERVIDOR] Hay {len(lista_clientes)} clientes conectados."
+                conn.send(respuesta.encode('utf-8'))
+                continue
             
             print(f"[{addr}] dice: {mensaje}")
             
@@ -32,25 +37,25 @@ def manejar_cliente(conn, addr, lista_clientes):
 
 def servidorbase():
     host = '127.0.0.1' # la ip del servidor en localhost
-    port = 500007
+    port = 49152
     servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creo el socket  ipv4(AF_INET) y tcp(SOCK_STREAM)
     servidor.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # para permitir la reutilizacion de la direccion
       
     try:
         servidor.bind((host, port)) # enlazo el socket con la ip y el puerto
-        servidor.listen(5) # escucha 5 peticiones en cola de espera
+        servidor.listen(10) # escucha 5 peticiones en cola de espera
         print(f'El servidor esta escuchando en {host}:{port}')
         
         
         clientes_activos = []
-        print("[INICIO] Servidor escuchando en el puerto 5050...")
+        print("[INICIO] Servidor escuchando en el puerto 49152...")
 
         while True:
-            conn, addr = server.accept()
+            conn, addr = servidor.accept()
             clientes_activos.append(conn) # Se agrega cliente a la lista
             
             # Crear hilo para el nuevo cliente
-            hilo = threading.Thread(target=manejar_cliente, args=(conn, addr, clientes_activos))
+            hilo = th.Thread(target=manejar_cliente, args=(conn, addr, clientes_activos))
             hilo.start()
             
             print(f"[CLIENTES ACTIVOS] {len(clientes_activos)}")

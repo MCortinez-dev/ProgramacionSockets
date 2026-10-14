@@ -6,7 +6,7 @@ RESET = "\033[0m"
 
 def funcion_cliente():
     host = "127.0.0.1"
-    port = 500007
+    port = 49152
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
     
