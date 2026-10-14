@@ -6,6 +6,9 @@ import threading as th
 
 def manejar_cliente(conn, addr, lista_clientes):
     print(f"\n[NUEVA CONEXIÓN] {addr} conectado.")
+
+    VERDE = "\033[3;32m"
+    RESET = "\033[0m"
     
     conectado = True
     while conectado:
@@ -15,15 +18,21 @@ def manejar_cliente(conn, addr, lista_clientes):
             if not mensaje:
                 break
 
+            # Intento evitar error ConnectionAbortedError: [WinError 10053]
+            if mensaje.strip().lower() == "/adios":
+                print(f"{VERDE}[{addr}] solicitó desconexión (/adios).{RESET}")
+                conn.send("¡Adiós! Cerrando conexión...".encode('utf-8'))
+                break
+
             if mensaje.strip().lower() == "/users":
-                respuesta = f"[SERVIDOR] Hay {len(lista_clientes)} clientes conectados."
+                respuesta = f"{VERDE}[SERVIDOR] Hay {len(lista_clientes)} clientes conectados.{RESET}"
                 conn.send(respuesta.encode('utf-8'))
                 continue
             
-            print(f"[{addr}] dice: {mensaje}")
+            print(f"{VERDE}[{addr}] dice: {mensaje}{RESET}")
             
             # Eco: devuelve el mensaje al cliente
-            conn.send(f"Eco: {mensaje}".encode('utf-8'))
+            conn.send(f"{VERDE}Eco: {mensaje}{RESET}".encode('utf-8'))
             
         except ConnectionResetError: #Captura error de desconexión
             break
@@ -31,7 +40,8 @@ def manejar_cliente(conn, addr, lista_clientes):
     # Al terminar la conexión
     conn.close()
     # Elimina este socket de la lista global de clientes
-    lista_clientes.remove(conn)
+    if conn in lista_clientes:
+        lista_clientes.remove(conn)
     print(f"\n[DESCONEXIÓN] {addr} se ha ido.")
     print(f"[CLIENTES ACTIVOS] {len(lista_clientes)}")
 
@@ -40,6 +50,9 @@ def servidorbase():
     port = 49152
     servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creo el socket  ipv4(AF_INET) y tcp(SOCK_STREAM)
     servidor.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # para permitir la reutilizacion de la direccion
+
+    VERDE = "\033[3;32m"
+    RESET = "\033[0m"    
       
     try:
         servidor.bind((host, port)) # enlazo el socket con la ip y el puerto
@@ -48,7 +61,7 @@ def servidorbase():
         
         
         clientes_activos = []
-        print("[INICIO] Servidor escuchando en el puerto 49152...")
+        print(f"{VERDE}[INICIO] Servidor escuchando en el puerto 49152...{RESET}")
 
         while True:
             conn, addr = servidor.accept()
@@ -58,12 +71,12 @@ def servidorbase():
             hilo = th.Thread(target=manejar_cliente, args=(conn, addr, clientes_activos))
             hilo.start()
             
-            print(f"[CLIENTES ACTIVOS] {len(clientes_activos)}")
+            print(f"{VERDE}[CLIENTES ACTIVOS] {len(clientes_activos)}{RESET}")
 
     except KeyboardInterrupt:
         print('Servidor detenido')
     except ConnectionResetError:
-        print('Conexion cerrada por el cliente')
+        print(f'{VERDE}Conexion cerrada por el cliente{RESET}')
     finally:
         servidor.close()
 

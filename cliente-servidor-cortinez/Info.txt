@@ -64,8 +64,8 @@ servidor.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 # Bibliofrafia
 # https://docs.python.org/3/library/socket.html
 # https://docs.python.org/3/library/socketserver.html#module-socketserver
-# 
-https://docs.python.org/3/library/threading.html
+ 
+# https://docs.python.org/3/library/threading.html
 
 # https://elpythonista.com/f-strings-python
 # https://ierwinx.com/python/terminal/colores-y-estilos.html
