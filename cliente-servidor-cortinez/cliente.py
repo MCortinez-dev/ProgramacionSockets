@@ -4,7 +4,8 @@
 import socket
 import time
 
-SUPERMAGENTA = "\033[1;4;44;95m" # negrira - fondo azul - subrayado - magenta brillante
+SUPERMAGENTA = "\033[1;4;95m" # negrira - fondo azul - subrayado - magenta brillante
+CIAN = "\033[36m"
 RESET = "\033[0m"
 
 def funcion_cliente():
@@ -22,16 +23,23 @@ def funcion_cliente():
             
             cosas_tipeadas = input("> ")
 
-            if msg.strip().lower() == "exitOK":
-                s.send(msg.encode('utf-8'))
+            # Para salir
+            if cosas_tipeadas.strip().lower() == "/adios":
+                s.send(cosas_tipeadas.encode('utf-8'))
                 break
 
-            msg = f"{SUPERMAGENTA}[{hora_actual}] Soy un cliente que ingresa datos por el teclado [para dejar de escribir = /adios] > este es el mensaje {cosas_tipeadas}\n{RESET}"
+            # Para recivir lista usuarios conectados
+            if cosas_tipeadas.strip().lower() == "/users":
+                s.send(cosas_tipeadas.encode('utf-8'))
+                respuesta_servidor = s.recv(1024).decode('utf-8')
+                print(f"\n{respuesta_servidor}\n")
+                continue            
+
+            msg = f"{SUPERMAGENTA}[{hora_actual}] Soy un cliente que ingresa datos por el teclado [para dejar de escribir = /adios] > este es el mensaje =>>> {RESET} {CIAN}{cosas_tipeadas}\n{RESET}"
 
             s.send(msg.encode('utf-8'))             
 
             recivido = s.recv(1024).decode('utf-8')
-            
             print(recivido)
             # time.sleep(1.5) # Tiempo entre mensajes
 

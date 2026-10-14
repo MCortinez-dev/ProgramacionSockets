@@ -69,3 +69,21 @@ https://docs.python.org/3/library/threading.html
 
 # https://elpythonista.com/f-strings-python
 # https://ierwinx.com/python/terminal/colores-y-estilos.html
+
+----------------------------------------------------------------------------------------------------------------------------
+
+Error al salir
+
+[('127.0.0.1', 28441)] dice: /adios
+Exception in thread Thread-1 (manejar_cliente):
+Traceback (most recent call last):
+  File "C:\Users\fudom\AppData\Local\Python\pythoncore-3.14-64\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\fudom\AppData\Local\Python\pythoncore-3.14-64\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Git-Hub\Sockets\cliente-servidor-cortinez\servidor.py", line 14, in manejar_cliente
+    mensaje = conn.recv(1024).decode('utf-8') # Recibe hasta 1024 bytes de datos desde el socket del cliente y los decodifica de bytes a texto (string)
+              ~~~~~~~~~^^^^^^
+ConnectionAbortedError: [WinError 10053] Se ha anulado una conexión establecida por el software en su equipo host
