@@ -70,6 +70,9 @@ def servidorbase():
             # Crear hilo para el nuevo cliente
             hilo = th.Thread(target=manejar_cliente, args=(conn, addr, clientes_activos))
             hilo.start()
+
+            # Intente agregar join pero me trabó todo
+            # hilo.join()
             
             print(f"{VERDE}[CLIENTES ACTIVOS] {len(clientes_activos)}{RESET}")
 
