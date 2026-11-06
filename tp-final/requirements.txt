@@ -1,3 +1,11 @@
 # REQUISITOS DE INSTALACIÓN (Ejecutar en la terminal):
 # pip install mysql-connector-python
 # pip install requests
+
+
+# Info
+# https://escueladeprogramacion.net/blog/como-conectar-python-con-mysql-guia-paso-a-paso-con-ejemplos
+#
+#
+#
+#
