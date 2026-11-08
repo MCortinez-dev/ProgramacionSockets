@@ -46,7 +46,7 @@ def manejar_cliente(conn, addr, lista_clientes):
     # Conecto a la base de datos
     db_up = conectar_DB()
     if db_up:
-        print(f"Base de datos creada correctamente")
+        print(f"La base de datos existe y la encontramos a traves del puerso 3306")
     else:
         print(f"Hay un prblema en la base de datos")
 
@@ -73,10 +73,12 @@ def manejar_cliente(conn, addr, lista_clientes):
 
                 try:
                     consulta.execute("SELECT * FROM usuarios WHERE nombre = %s AND clave_encrip = %s", (usuario_cliente, usuario_clave))
+                    consulta_respuesta = consulta.fetchone()  # Verifico si pudo realizar la consulta
+                
                     
                     # Si se ejecuto la consulta significa que habia un usuario y contraseña iguales en la Base de Datos
-                    while True:
-
+                    if consulta_respuesta:
+                        print(f'Tu usuario y contraseña son correctos')
                         # Recibe el mensaje luego de validar y se queda charlando
                         mensaje = conn.recv(1024).decode('utf-8') # Recibe hasta 1024 bytes de datos desde el socket del cliente y los decodifica de bytes a texto (string)
                         if not mensaje:
@@ -97,12 +99,21 @@ def manejar_cliente(conn, addr, lista_clientes):
                         
                         # Eco: devuelve el mensaje al cliente
                         conn.send(f"{VERDE}Eco: {mensaje}{RESET}".encode('utf-8'))
-                        
+
+                    else:
+                        print(f'Usuario o contraseña incorrectos')
+        
+                except Error as e:
+                    print(f"Error: {e}")
+                    return None
                 except ConnectionResetError: #Captura error de desconexión
                     break
 
             else:
                 print("Problema con la DB")
+                # Se ko decimos al cliente
+                conn.send("Usuario o contraseña incorrectos. Conexión rechazada.\n".encode('utf-8'))
+                break
 
         except Exception as e:
             print(f"Error inesperado en el cliente: {e}")
