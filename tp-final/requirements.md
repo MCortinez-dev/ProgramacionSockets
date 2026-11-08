@@ -1,5 +1,6 @@
-# REQUISITOS DE INSTALACIÓN (Ejecutar en la terminal):
+# REQUISITOS DE INSTALACIÓN
 
+Ejecuta esto comando en la terminal:
 ```bash
 pip install mysql-connector-python
 pip install requests
