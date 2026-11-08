@@ -11,8 +11,8 @@ create TABLE usuarios (
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci; //ultima parte buenas practicas evita errores
 
 --Intento de harcodear un usuario, si llego intento CRUD usuario (Usuario: admin | Contraseña: admin123):
-INSERT INTO `usuarios` (`id`, `usuario`, `password_hash`) VALUES
-(1, 'admin', '$2y$10$IwjNFFVUk8SnHO.jORhN0OyhO15nJM7947BbOyxM6GSa5C/sKN1FK');
+INSERT INTO `usuarios` (`id`, `nombre`, `clave_encrip`) VALUES
+(1, 'admin', 'admin123');
 
 ---------------------
 -- Tablas APIs

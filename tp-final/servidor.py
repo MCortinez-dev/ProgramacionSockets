@@ -104,13 +104,17 @@ def manejar_cliente(conn, addr, lista_clientes):
             else:
                 print("Problema con la DB")
 
-            # Al terminar la conexión
-            conn.close()
-            # Elimina este socket de la lista global de clientes
-            if conn in lista_clientes:
-                lista_clientes.remove(conn)
-            print(f"\n[DESCONEXIÓN] {addr} se ha ido.")
-            print(f"[CLIENTES ACTIVOS] {len(lista_clientes)}")
+        except Exception as e:
+            print(f"Error inesperado en el cliente: {e}")
+            break
+
+        # Al terminar la conexión
+        conn.close()
+        # Elimina este socket de la lista global de clientes
+        if conn in lista_clientes:
+            lista_clientes.remove(conn)
+        print(f"\n[DESCONEXIÓN] {addr} se ha ido.")
+        print(f"[CLIENTES ACTIVOS] {len(lista_clientes)}")
 
 # Funcion servidor (invoca el poder de las otras funciones)
 def servidorbase():
