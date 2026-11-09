@@ -1,3 +1,4 @@
+#Importar librerias a usar
 import socket
 import threading as th # Multihilos
 
@@ -67,19 +68,21 @@ def manejar_cliente(conn, addr, lista_clientes):
             if not usuario_clave:
                 break
 
-            # Si hay una base de datos levantada, entocees hago la consulta para comparar
+            # Si hay una base de datos levantada, entoces hago la consulta para comparar
             if db_up:
                 consulta = db_up.cursor()
-
-                try:
-                    consulta.execute("SELECT * FROM usuarios WHERE nombre = %s AND clave_encrip = %s", (usuario_cliente, usuario_clave))
-                    consulta_respuesta = consulta.fetchone()  # Verifico si pudo realizar la consulta
                 
+                # Limpio el código sacando el try
+                consulta.execute("SELECT * FROM usuarios WHERE nombre = %s AND clave_encrip = %s", (usuario_cliente, usuario_clave))
+                consulta_respuesta = consulta.fetchone()  # Verifico si pudo realizar la consulta
+                
+                # Si se ejecuto la consulta significa que habia un usuario y contraseña iguales en la Base de Datos
+                if consulta_respuesta:
+                    print(f'{usuario_cliente} tu usuario y contraseña son correctos')
+                    # Recibe el mensaje luego de validar y se queda charlando
+                    conn.send("¡Ya podemos charlas! Bienvenido\n".encode('utf-8'))
                     
-                    # Si se ejecuto la consulta significa que habia un usuario y contraseña iguales en la Base de Datos
-                    if consulta_respuesta:
-                        print(f'Tu usuario y contraseña son correctos')
-                        # Recibe el mensaje luego de validar y se queda charlando
+                    while conectado:
                         mensaje = conn.recv(1024).decode('utf-8') # Recibe hasta 1024 bytes de datos desde el socket del cliente y los decodifica de bytes a texto (string)
                         if not mensaje:
                             break
@@ -87,37 +90,34 @@ def manejar_cliente(conn, addr, lista_clientes):
                         # Intento evitar error ConnectionAbortedError: [WinError 10053]
                         if mensaje.strip().lower() == "/adios":
                             print(f"{VERDE}[{addr}] solicitó desconexión (/adios).{RESET}")
-                            conn.send("¡Adiós! Cerrando conexión...".encode('utf-8'))
+                            try:
+                                conn.send("¡Adiós! Cerrando conexión...".encode('utf-8'))
+                            except:
+                                pass # Intento evitar error ConnectionAbortedError: [WinError 10038] - no sirvió
                             break
 
                         if mensaje.strip().lower() == "/users":
                             respuesta = f"{VERDE}[SERVIDOR] Hay {len(lista_clientes)} clientes conectados.{RESET}"
                             conn.send(respuesta.encode('utf-8'))
                             continue
+
+                        # Zona invocación poder obscuro de las APIs ?? 
                         
                         print(f"\n{VERDE}[{addr}] dice:\n {mensaje}{RESET}")
-                        
                         # Eco: devuelve el mensaje al cliente
                         conn.send(f"{VERDE}Eco: {mensaje}{RESET}".encode('utf-8'))
 
-                    else:
-                        print(f'Usuario o contraseña incorrectos')
-        
-                except Error as e:
-                    print(f"Error: {e}")
-                    return None
-                except ConnectionResetError: #Captura error de desconexión
+                else:
+                    print(f'Usuario o contraseña incorrectos')
+                    conn.send("Usuario o contraseña incorrectos. Conexión rechazada.\n".encode('utf-8'))
                     break
-
+        
             else:
                 print("Problema con la DB")
-                # Se ko decimos al cliente
-                conn.send("Usuario o contraseña incorrectos. Conexión rechazada.\n".encode('utf-8'))
                 break
 
         except Exception as e:
             print(f"Error inesperado en el cliente: {e}")
-            break
 
         # Al terminar la conexión
         conn.close()
@@ -127,6 +127,7 @@ def manejar_cliente(conn, addr, lista_clientes):
         print(f"\n[DESCONEXIÓN] {addr} se ha ido.")
         print(f"[CLIENTES ACTIVOS] {len(lista_clientes)}")
 
+#----------------------------------------------------------------------------------------------------------------------------
 # Funcion servidor (invoca el poder de las otras funciones)
 def servidorbase():
     host = '127.0.0.1' # la ip del servidor en localhost
