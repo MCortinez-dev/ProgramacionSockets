@@ -55,11 +55,10 @@ def funcion_cliente():
             msg = f"{CIAN}[{hora_actual}] Soy un cliente que ingresa datos por el teclado [para dejar de escribir = /adios] > este es el mensaje =>>> {RESET} {SUPERMAGENTA}{cosas_tipeadas}\n{RESET}"
             s.send(msg.encode('utf-8'))             
 
-            recivido = s.recv(1024).decode('utf-8')
-            print(recivido)
+            # Recibo respuesta servidor
+            recibido = s.recv(1024).decode('utf-8')
+            print(recibido)
 
-        else:
-            print("No se requirio usuario ni contraseña")
 
     except ConnectionRefusedError:
         print("No se pudo conectar al servidor(sevidor rechazo la conexion)")

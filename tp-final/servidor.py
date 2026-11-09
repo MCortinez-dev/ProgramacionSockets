@@ -47,7 +47,7 @@ def manejar_cliente(conn, addr, lista_clientes):
     # Conecto a la base de datos
     db_up = conectar_DB()
     if db_up:
-        print(f"La base de datos existe y la encontramos a traves del puerso 3306")
+        print(f"La base de datos existe y la encontramos a traves del puerto 3306")
     else:
         print(f"Hay un prblema en la base de datos")
 
@@ -83,10 +83,11 @@ def manejar_cliente(conn, addr, lista_clientes):
                     conn.send("¡Ya podemos charlas! Bienvenido\n".encode('utf-8'))
                     
                     while conectado:
+                        # Recibo mensajes del cliente
                         mensaje = conn.recv(1024).decode('utf-8') # Recibe hasta 1024 bytes de datos desde el socket del cliente y los decodifica de bytes a texto (string)
                         if not mensaje:
                             break
-
+                        
                         # Intento evitar error ConnectionAbortedError: [WinError 10053]
                         if mensaje.strip().lower() == "/adios":
                             print(f"{VERDE}[{addr}] solicitó desconexión (/adios).{RESET}")
@@ -104,8 +105,10 @@ def manejar_cliente(conn, addr, lista_clientes):
                         # Zona invocación poder obscuro de las APIs ?? 
                         
                         print(f"\n{VERDE}[{addr}] dice:\n {mensaje}{RESET}")
-                        # Eco: devuelve el mensaje al cliente
-                        conn.send(f"{VERDE}Eco: {mensaje}{RESET}".encode('utf-8'))
+
+                        # Mensajes SERVIDOR/CLIENTE
+                        mensaje_servidor = input("Mensaje servidor a {addr} >>")
+                        conn.send(f"{VERDE}Eco: {mensaje_servidor}{RESET}".encode('utf-8'))
 
                 else:
                     print(f'Usuario o contraseña incorrectos')
@@ -118,12 +121,18 @@ def manejar_cliente(conn, addr, lista_clientes):
 
         except Exception as e:
             print(f"Error inesperado en el cliente: {e}")
+            break
 
         # Al terminar la conexión
-        conn.close()
-        # Elimina este socket de la lista global de clientes
+        try:
+            conn.close()
+            # Elimina este socket de la lista global de clientes
+        except:
+            pass
+        
         if conn in lista_clientes:
             lista_clientes.remove(conn)
+        
         print(f"\n[DESCONEXIÓN] {addr} se ha ido.")
         print(f"[CLIENTES ACTIVOS] {len(lista_clientes)}")
 
