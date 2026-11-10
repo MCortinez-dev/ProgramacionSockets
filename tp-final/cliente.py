@@ -38,20 +38,34 @@ def funcion_cliente():
             hora_actual = time.strftime("%H:%M:%S") # Guardo la hora en un formato que me sirva para mosstrar diferentes mensajes
             cosas_tipeadas = input("> ")
 
+            # Al aumentar los comandos guardo lo tipeado en una variable limpia
+            cmd_ingresado = cosas_tipeadas.strip().lower()
+
             # Para salir
-            if cosas_tipeadas.strip().lower() == "/adios":
+            if cmd_ingresado == "/adios":
                 s.send(cosas_tipeadas.encode('utf-8'))
                 despedida = s.recv(1024).decode('utf-8')
                 print(despedida)
                 break
 
             # Para recivir lista usuarios conectados
-            if cosas_tipeadas.strip().lower() == "/users":
+            if cmd_ingresado == "/users":
                 s.send(cosas_tipeadas.encode('utf-8'))
                 respuesta_servidor = s.recv(1024).decode('utf-8')
                 print(f"\n{respuesta_servidor}\n")
                 continue
 
+             # Para trabajar con la API
+            if cmd_ingresado.startswith("/repos") or cmd_ingresado.startswith("/followers"):
+                s.send(cosas_tipeadas.encode('utf-8'))
+
+                # Muestra la respuesta que deberia variar segun el comando ingresado
+                respuesta_servidor = s.recv(1024).decode('utf-8')
+                print(f"\n{respuesta_servidor}\n")
+                
+                continue
+            
+            # Mensaje general - es posible que me genere errores (evaluar limpiar)
             msg = f"{CIAN}[{hora_actual}] Soy un cliente que ingresa datos por el teclado [para dejar de escribir = /adios] > este es el mensaje =>>> {RESET} {SUPERMAGENTA}{cosas_tipeadas}\n{RESET}"
             s.send(msg.encode('utf-8'))             
 

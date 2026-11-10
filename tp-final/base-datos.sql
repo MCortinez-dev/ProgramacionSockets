@@ -16,3 +16,14 @@ INSERT INTO `usuarios` (`id`, `nombre`, `clave_encrip`) VALUES
 
 ---------------------
 -- Tablas APIs
+
+CREATE TABLE IF NOT EXISTS repositorios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    html_url VARCHAR(255) NOT NULL,
+    watchers_count INT DEFAULT 0,
+    stargazers_count INT DEFAULT 0,
+    created_at VARCHAR(100),
+    updated_at VARCHAR(100)
+);
+

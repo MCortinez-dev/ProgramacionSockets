@@ -8,8 +8,8 @@ from mysql.connector import Error
 import os # Nueva forma que encontre importa cosas del sistema operativo (probar)
 from dotenv import load_dotenv  # pip install python-dotenv
 
-# 
-import requests
+# The requests module allows you to send HTTP requests using Python.
+import requests 
 
 #-----------------------------------------------------------------------------------------------------
 # Cargo variables entorno
@@ -87,9 +87,27 @@ def manejar_cliente(conn, addr, lista_clientes):
                         mensaje = conn.recv(1024).decode('utf-8') # Recibe hasta 1024 bytes de datos desde el socket del cliente y los decodifica de bytes a texto (string)
                         if not mensaje:
                             break
-                        
+
+                        # Como hay muchos comandos, limpio el mensaje una sola vez. Saca espacios en los extremos y pone en minúscula
+                        cmd = mensaje.strip().lower()
+
+                        # Si el mensaje empieza con los comandos de GitHub
+                        if cmd.startswith("/repos") or cmd.startswith("/followers"):
+                            partes = cmd.split() # Separa por espacios, para ver si me lee el nombre de usuario que busco
+                            tipo_comando = partes[0] # "/repos"
+                            
+                            # Cuando escriba un usuario va a habeer dos partes en el mensaje
+                            if len(partes) > 1:
+                                usuario_seleccionado = partes[1]
+                            else:
+                                usuario_seleccionado = "" # Si mandó solo /repos vacío
+
+                            # Ahora si intento ir a la función pero con un nuevo argumento
+                            github(tipo_comando, conn, db_up, usuario_seleccionado)
+                            continue
+
                         # Intento evitar error ConnectionAbortedError: [WinError 10053]
-                        if mensaje.strip().lower() == "/adios":
+                        if cmd == "/adios":
                             print(f"{VERDE}[{addr}] solicitó desconexión (/adios).{RESET}")
                             try:
                                 conn.send("¡Adiós! Cerrando conexión...".encode('utf-8'))
@@ -97,14 +115,12 @@ def manejar_cliente(conn, addr, lista_clientes):
                                 pass # Intento evitar error ConnectionAbortedError: [WinError 10038] - no sirvió
                             break
 
-                        if mensaje.strip().lower() == "/users":
+                        if cmd == "/users":
                             respuesta = f"{VERDE}[SERVIDOR] Hay {len(lista_clientes)} clientes conectados.{RESET}"
                             conn.send(respuesta.encode('utf-8'))
                             continue
-
-                        # Zona invocación poder obscuro de las APIs ?? 
                         
-                        print(f"\n{VERDE}[{addr}] dice:\n {mensaje}{RESET}")
+                        #print(f"\n{VERDE}[{addr}] dice:\n {mensaje}{RESET}")
 
                         # Mensajes SERVIDOR/CLIENTE
                         mensaje_servidor = input("Mensaje servidor a {addr} >>")
@@ -135,6 +151,77 @@ def manejar_cliente(conn, addr, lista_clientes):
         
         print(f"\n[DESCONEXIÓN] {addr} se ha ido.")
         print(f"[CLIENTES ACTIVOS] {len(lista_clientes)}")
+#----------------------------------------------------------------------------------------------------------------------------
+# Funcion utiliza request para manejar comandos de API
+def github(comando, conn, db_up, usuario_seleccionado):
+
+    try:
+        # Si el usuario vino vacío o no lo pusieron al lado
+        if not usuario_seleccionado:
+            conn.send("Error: Debe ingresar un usuario de GitHub (Ej: /repos octocat).\n".encode('utf-8'))
+            return    
+        
+        # Si no hay base de datos levantada
+        if not db_up:
+            conn.send("Error: No hay conexión con la base de datos.\n".encode('utf-8'))
+            return
+
+        # Preparo puente SQL
+        cursor = db_up.cursor()
+
+        # url_followers = f'https://api.github.com/users/{user}/followers'
+        #---------------------------------------------------------------------------------------------
+        # Cuando el cliente usa el comando /repos
+        if comando == "/repos":
+            
+            # URLs de la API, agrego el usuario seleccionado
+            url_repo = f'https://api.github.com/users/{usuario_seleccionado}/repos'
+
+            # Agrego user agente en header: All API requests must include a valid User-Agent header. The User-Agent header identifies the user or application that is making the request.       
+            headers = {
+                'X-GitHub-Api-Version': '2026-03-10',
+                'User-Agent': 'MCortinez-dev_Project'
+                }
+
+            # Tomo de la url armada antes la info de los repos que tiene. La docu actual pide un header
+            datos_url_repo = requests.get(url_repo, headers=headers)
+
+            # Si reposnde peticion procesada correctamente (200)
+            if datos_url_repo.status_code == 200:
+                # Guardo el json que traje con el GET
+                repositorios = datos_url_repo.json()
+
+                # Recorrer cada repositorio, tomar datos e insertarlos en la base de datos
+                for repo in repositorios:
+                    name = repo.get('name')
+                    html_url = repo.get('html_url')
+                    watchers = repo.get('watchers_count', 0)
+                    stargazers = repo.get('stargazers_count', 0)
+                    created_at = repo.get('created_at', '')
+                    updated_at = repo.get('updated_at', '')
+                    
+                    # Muestro lo que se encontro y luego se guardo
+                    print(f"Guardando: {repo['name']} ({repo['html_url']})({repo['watchers_count']})({repo['stargazers_count']})({repo['created_at']})({repo['updated_at']})")
+
+                    # Esto inserta en la tabla los valores
+                    insertar_repositorio = f" INSERT INTO repositorios (name, html_url, watchers_count, stargazers_count, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s)"
+                    # Ejecuto consulta pasandoles los valores que estaban con signo de intrrrogacion
+                    cursor.execute(insertar_repositorio, (name, html_url, watchers, stargazers, created_at, updated_at))
+                    db_up.commit() # saves the changes to the database transaction.
+                
+                
+                conn.send(f"El repositorio '{usuario_seleccionado}' y sus datos se guardaron en la base de datos.\n".encode('utf-8'))
+            else:
+                conn.send(f"Error al consultar repositorios: {datos_url_repo.status_code}\n".encode('utf-8'))
+    
+        cursor.close()
+
+    except Exception as e:
+        print(f"Error en la función github: {e}")
+        try:
+            conn.send("Ocurrió un error interno en el servidor al procesar GitHub.\n".encode('utf-8'))
+        except:
+            pass
 
 #----------------------------------------------------------------------------------------------------------------------------
 # Funcion servidor (invoca el poder de las otras funciones)
