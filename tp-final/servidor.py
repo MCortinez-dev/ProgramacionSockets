@@ -173,6 +173,8 @@ def github(comando, conn, db_up, usuario_seleccionado):
         #---------------------------------------------------------------------------------------------
         # Cuando el cliente usa el comando /repos
         if comando == "/repos":
+            # Para resolver problema 403, arme una token de github
+            token_github = os.getenv("GITHUB_TOKEN")
             
             # URLs de la API, agrego el usuario seleccionado
             url_repo = f'https://api.github.com/users/{usuario_seleccionado}/repos'
@@ -180,7 +182,8 @@ def github(comando, conn, db_up, usuario_seleccionado):
             # Agrego user agente en header: All API requests must include a valid User-Agent header. The User-Agent header identifies the user or application that is making the request.       
             headers = {
                 'X-GitHub-Api-Version': '2026-03-10',
-                'User-Agent': 'MCortinez-dev_Project'
+                'User-Agent': 'MCortinez-Project',
+                'Authorization': f'Bearer {token_github}'
                 }
 
             # Tomo de la url armada antes la info de los repos que tiene. La docu actual pide un header
@@ -193,20 +196,20 @@ def github(comando, conn, db_up, usuario_seleccionado):
 
                 # Recorrer cada repositorio, tomar datos e insertarlos en la base de datos
                 for repo in repositorios:
+                    owner = repo.get('owner', {}).get('login', usuario_seleccionado) # para acceder a owner la consulta es diferente
                     name = repo.get('name')
                     html_url = repo.get('html_url')
-                    watchers = repo.get('watchers_count', 0)
                     stargazers = repo.get('stargazers_count', 0)
                     created_at = repo.get('created_at', '')
                     updated_at = repo.get('updated_at', '')
                     
                     # Muestro lo que se encontro y luego se guardo
-                    print(f"Guardando: {repo['name']} ({repo['html_url']})({repo['watchers_count']})({repo['stargazers_count']})({repo['created_at']})({repo['updated_at']})")
+                    print(f"Guardando: {name} ({html_url}) (Stars: {stargazers})")
 
                     # Esto inserta en la tabla los valores
-                    insertar_repositorio = f" INSERT INTO repositorios (name, html_url, watchers_count, stargazers_count, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s)"
+                    insertar_repositorio = f" INSERT INTO repositorios (owner, name, html_url, stargazers_count, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s)"
                     # Ejecuto consulta pasandoles los valores que estaban con signo de intrrrogacion
-                    cursor.execute(insertar_repositorio, (name, html_url, watchers, stargazers, created_at, updated_at))
+                    cursor.execute(insertar_repositorio, (owner, name, html_url, stargazers, created_at, updated_at))
                     db_up.commit() # saves the changes to the database transaction.
                 
                 

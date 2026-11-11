@@ -11,7 +11,7 @@
 
 - [ ] 5)​ Cuando el mensaje del cliente esté precedido por una “/” quiere decir que se trata de un comando
 -     6)​ Comandos disponibles:
-    - [ ] a)​ /repos usuario : El programa Servidor debe guardar los datos de sus repositorios del usuario ingresado por el cliente en una tabla llamada repositorios
+    - [x] a)​ /repos usuario : El programa Servidor debe guardar los datos de sus repositorios del usuario ingresado por el cliente en una tabla llamada repositorios
     - [ ] b)​ /followers usuario: El programa Servidor debe guardar los datos de los followers del usuario ingresado por el cliente en una tabla llamada followers-[ ]
     - [ ] c)​ /hora El servidor debe devolver la hora del momento al cliente
     - [ ] d)​ /todos “mensaje” : Ese mensaje debe ser enviado  a todos los clientes que estén conectados-[ ]

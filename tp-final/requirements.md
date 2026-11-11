@@ -7,16 +7,27 @@ pip install requests
 pip install python-dotenv
 ```
 ---
+# Problema de 403
 
+Luego de acceder una vez a la API me bloqueo, así que procedo a usar un token. Pasos:
+- Desde la página de tu git hub ir a [Configuración](https://github.com/settings/profile) dentro de tu perfil de GIT-HUB
+- Luego a [Configuración_de_desarrollaror](https://github.com/settings/apps)
+- Una vez allí buscar [Tokesns_de_acceso_personal](https://github.com/settings/tokens)
+- Presionar GENERAR TOKEN NUEVA
+- Luego de generarla guardarla en .env
+
+---
 # Info
 
 - [Request](https://www.w3schools.com/python/module_requests.asp)
 - [Requests Module](https://www.w3schools.com/python/module_requests.asp "Info requests module")
 - [MySQL](https://escueladeprogramacion.net/blog/como-conectar-python-con-mysql-guia-paso-a-paso-con-ejemplos)
 - [Documentación_API](https://docs.github.com/es/rest?apiVersion=2026-03-10)
+- [Documentación_API/users](https://docs.github.com/en/rest/users/users?apiVersion=2026-03-10)
+- [Documentación_API/followers](https://docs.github.com/en/rest/users/followers?apiVersion=2026-03-10)
 - [Cusror_INfo](https://www.geeksforgeeks.org/python/python-sqlite-cursor-object/)
 
-
+---
 # Base de datos
 Comando terminal(evita el explorador)
 ```bash
@@ -37,9 +48,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
 ```bash
 CREATE TABLE IF NOT EXISTS repositorios (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    owner VARCHAR(100) NOT NULL,
+    name VARCHAR(150) NOT NULL,
     html_url VARCHAR(255) NOT NULL,
-    watchers_count INT DEFAULT 0,
     stargazers_count INT DEFAULT 0,
     created_at VARCHAR(100),
     updated_at VARCHAR(100)
@@ -66,3 +77,4 @@ DESCRIBE usuarios;
 ```Bash
 SELECT * FROM usuarios;
 ```
+---
