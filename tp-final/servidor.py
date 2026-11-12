@@ -9,7 +9,10 @@ import os # Nueva forma que encontre importa cosas del sistema operativo (probar
 from dotenv import load_dotenv  # pip install python-dotenv
 
 # The requests module allows you to send HTTP requests using Python.
-import requests 
+import requests
+
+# MOdulo de tiempo
+import time
 
 #-----------------------------------------------------------------------------------------------------
 # Cargo variables entorno
@@ -117,6 +120,12 @@ def manejar_cliente(conn, addr, lista_clientes):
 
                         if cmd == "/users":
                             respuesta = f"{VERDE}[SERVIDOR] Hay {len(lista_clientes)} clientes conectados.{RESET}"
+                            conn.send(respuesta.encode('utf-8'))
+                            continue
+
+                        if cmd == "/hora":
+                            hora_actual = time.strftime("%H:%M:%S") # Guardo la hora en un formato que sirva para verse en la respuesta
+                            respuesta = f"{VERDE}[SERVIDOR] La hora actual es {hora_actual}.{RESET}"
                             conn.send(respuesta.encode('utf-8'))
                             continue
                         

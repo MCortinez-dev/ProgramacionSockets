@@ -55,6 +55,13 @@ def funcion_cliente():
                 print(f"\n{respuesta_servidor}\n")
                 continue
 
+            # Para recivir la hora
+            if cmd_ingresado == "/hora":
+                s.send(cosas_tipeadas.encode('utf-8'))
+                hora_recibida = s.recv(1024).decode('utf-8')
+                print(f"\n{hora_recibida}\n")
+                continue
+
              # Para trabajar con la API
             if cmd_ingresado.startswith("/repos") or cmd_ingresado.startswith("/followers"):
                 s.send(cosas_tipeadas.encode('utf-8'))
