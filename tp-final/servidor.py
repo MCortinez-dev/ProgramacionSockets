@@ -169,7 +169,6 @@ def github(comando, conn, db_up, usuario_seleccionado):
         # Preparo puente SQL
         cursor = db_up.cursor()
 
-        # url_followers = f'https://api.github.com/users/{user}/followers'
         #---------------------------------------------------------------------------------------------
         # Cuando el cliente usa el comando /repos
         if comando == "/repos":
@@ -194,6 +193,9 @@ def github(comando, conn, db_up, usuario_seleccionado):
                 # Guardo el json que traje con el GET
                 repositorios = datos_url_repo.json()
 
+                # Parte de arriba intento de tabla guardada
+                confirmacion_guardado = f"\n--- REPOSITORIOS DE: {usuario_seleccionado} ---\n"
+
                 # Recorrer cada repositorio, tomar datos e insertarlos en la base de datos
                 for repo in repositorios:
                     owner = repo.get('owner', {}).get('login', usuario_seleccionado) # para acceder a owner la consulta es diferente
@@ -211,12 +213,63 @@ def github(comando, conn, db_up, usuario_seleccionado):
                     # Ejecuto consulta pasandoles los valores que estaban con signo de intrrrogacion
                     cursor.execute(insertar_repositorio, (owner, name, html_url, stargazers, created_at, updated_at))
                     db_up.commit() # saves the changes to the database transaction.
+                    confirmacion_guardado += f"|| {name}\n | {html_url}\n > Stars:{stargazers} > Actualizado: {updated_at}\n \n"
                 
-                
-                conn.send(f"El repositorio '{usuario_seleccionado}' y sus datos se guardaron en la base de datos.\n".encode('utf-8'))
+                #conn.send(f"El repositorio '{usuario_seleccionado}' y sus datos se guardaron en la base de datos.\n".encode('utf-8'))
+                conn.send(confirmacion_guardado.encode('utf-8'))
+
             else:
                 conn.send(f"Error al consultar repositorios: {datos_url_repo.status_code}\n".encode('utf-8'))
-    
+
+
+        elif comando == "/followers": # Cuando usa el otro comando
+            # Para resolver problema 403, usamos el token
+            token_github = os.getenv("GITHUB_TOKEN")
+            # URL followers
+            url_followers = f'https://api.github.com/users/{usuario_seleccionado}/followers'
+
+            #Headers con el token agregado
+            headers = {
+            'X-GitHub-Api-Version': '2026-03-10',
+            'User-Agent': 'MCortinez-Project',
+            'Authorization': f'Bearer {token_github}'
+            }
+            
+            # Teniendo muchas variables configuradas arriba le inicio la consulta
+            datos_url_followers = requests.get(url_followers, headers=headers)
+
+            if datos_url_followers.status_code == 200:
+
+                followers = datos_url_followers.json()
+
+                #Muestreo de followers
+                f_guardado = f"\n-- Seguidores de: {usuario_seleccionado} --\n"
+
+                # Recorrer cada repositorio, tomar datos e insertarlos en la base de datos
+                for f in followers:
+                    owner = usuario_seleccionado
+                    f_name = f.get('login')
+                    f_html_url = f.get('html_url')
+                    type = f.get('type')
+
+                    # Muestro lo que se encontro y luego se guardo
+                    print(f"Guardando: {f_name} ({f_html_url}) (Type: {type})")
+
+                    # Esto inserta en la tabla los valores
+                    insertar_follower = f" INSERT INTO followers (seleccionado, f_name, f_html_url, f_type) VALUES (%s, %s, %s, %s)"
+                    
+                    # Ejecuto consulta pasandoles los valores que estaban con signo de intrrrogacion
+                    cursor.execute(insertar_follower, (owner, f_name, f_html_url, type))
+                    db_up.commit() # saves the changes to the database transaction.
+                    
+                    f_guardado += f"|| {f_name}\n | {f_html_url}\n \n"
+                
+                #conn.send(f"El repositorio '{usuario_seleccionado}' y sus datos se guardaron en la base de datos.\n".encode('utf-8'))
+                conn.send(f_guardado.encode('utf-8'))
+
+            else:
+                conn.send(f"Error al consultar seguidores: {datos_url_followers.status_code}\n".encode('utf-8'))                   
+            
         cursor.close()
 
     except Exception as e:

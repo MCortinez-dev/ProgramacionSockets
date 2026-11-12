@@ -25,5 +25,13 @@ CREATE TABLE IF NOT EXISTS repositorios (
     stargazers_count INT DEFAULT 0,
     created_at VARCHAR(100),
     updated_at VARCHAR(100)
-);
+); ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+
+CREATE TABLE IF NOT EXISTS followers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    seleccionado VARCHAR(100) NOT NULL,
+    f_name VARCHAR(150) NOT NULL,
+    f_html_url VARCHAR(255) NOT NULL,
+    f_type VARCHAR(100)
+); ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
 

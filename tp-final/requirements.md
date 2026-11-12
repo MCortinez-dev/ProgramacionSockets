@@ -57,6 +57,16 @@ CREATE TABLE IF NOT EXISTS repositorios (
 );
 ```
 
+```bash
+CREATE TABLE IF NOT EXISTS followers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    seleccionado VARCHAR(100) NOT NULL,
+    f_name VARCHAR(150) NOT NULL,
+    f_html_url VARCHAR(255) NOT NULL,
+    f_type VARCHAR(100)
+);
+```
+
 ```Bash
 INSERT INTO `usuarios` (`id`, `nombre`, `clave_encrip`) VALUES
 (1, 'admin', '$2y$10$IwjNFFVUk8SnHO.jORhN0OyhO15nJM7947BbOyxM6GSa5C/sKN1FK');
