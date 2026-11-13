@@ -1,11 +1,3 @@
-# REQUISITOS DE INSTALACIÓN
-
-Ejecuta esto comando en la terminal:
-```bash
-pip install mysql-connector-python
-pip install requests
-pip install python-dotenv
-```
 ---
 # Problema de 403
 
