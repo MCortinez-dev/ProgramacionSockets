@@ -14,7 +14,7 @@
     - [x] a)​ /repos usuario : El programa Servidor debe guardar los datos de sus repositorios del usuario ingresado por el cliente en una tabla llamada repositorios
     - [x] b)​ /followers usuario: El programa Servidor debe guardar los datos de los followers del usuario ingresado por el cliente en una tabla llamada followers
     - [x] c)​ /hora El servidor debe devolver la hora del momento al cliente
-    - [ ] d)​ /todos “mensaje” : Ese mensaje debe ser enviado  a todos los clientes que estén conectados
+    - [x] d)​ /todos “mensaje” : Ese mensaje debe ser enviado  a todos los clientes que estén conectados
     - [x] e)​ /usuarios El servidor debe devolver la lista de todos los usuarios conectados
     - [x] f)​ /adios Se envía un mensaje de despedida y se desconecta.
 
