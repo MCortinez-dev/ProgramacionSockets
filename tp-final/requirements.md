@@ -26,6 +26,12 @@ Luego de acceder una vez a la API me bloqueo, así que procedo a usar un token. 
 - [Documentación_API/users](https://docs.github.com/en/rest/users/users?apiVersion=2026-03-10)
 - [Documentación_API/followers](https://docs.github.com/en/rest/users/followers?apiVersion=2026-03-10)
 - [Cusror_INfo](https://www.geeksforgeeks.org/python/python-sqlite-cursor-object/)
+- [Sockets-IBM](https://www.ibm.com/docs/es/i/7.5.0?topic=programming-how-sockets-work)
+- [To-solve-point-6.d](https://docs.python.org/es/3/library/socket.html#socket.socket.sendall)
+
+- Genera un auditing event socket.sendmsg con los argumentos self, address. Added in version 3.3.
+    Distinto en la versión 3.5: Si se interrumpe la llamada del sistema y el controlador de señal no genera una excepción, el método ahora vuelve a intentar la llamada del sistema en lugar de generar una excepción InterruptedError (consulte PEP 475 para la lógica).
+
 
 ---
 # Base de datos

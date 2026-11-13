@@ -94,6 +94,27 @@ def manejar_cliente(conn, addr, lista_clientes):
                         # Como hay muchos comandos, limpio el mensaje una sola vez. Saca espacios en los extremos y pone en minúscula
                         cmd = mensaje.strip().lower()
 
+                        # Cliente X manda de su consola a todos - lo pongo aca para que lo verifique a penas revisa sus credenciales
+                        if cmd.startswith("/todos"):
+                            partes = mensaje.split(maxsplit=1) # Separa por espacios, para ver si me lee el nombre de usuario que busco
+
+                            # Si tiene algo escrito para todos lo agarro, guardo y envío
+                            if len(partes) > 1:
+                                mensaje_a_todos = partes[1]
+                                texto_a_enviar = f"\n[Mensaje a todo el mundo de {addr}]: {mensaje_a_todos}\n"
+                                #respuesta_remitente = f"\n[SERVIDOR] Mensaje enviado a todos los usuarios con éxito.\n"
+                            else:
+                                texto_a_enviar = f"\n[Mensaje a todo el mundo de {addr}]: NADA de NADA\n" # Si mandó solo algo vacio
+                                #respuesta_remitente = f"\n[SERVIDOR] No escribiste nada para enviar.\n"
+                            
+                            # PRobar poninedo clientes boots si los recorre y les envia el mensaje
+                            for cliente_socket in lista_clientes.copy():
+                                try:
+                                    cliente_socket.sendall(texto_a_enviar.encode('utf-8'))
+                                except:
+                                    pass # Para evitar errores ?? probar                            
+                            continue
+
                         # Si el mensaje empieza con los comandos de GitHub
                         if cmd.startswith("/repos") or cmd.startswith("/followers"):
                             partes = cmd.split() # Separa por espacios, para ver si me lee el nombre de usuario que busco
@@ -118,7 +139,7 @@ def manejar_cliente(conn, addr, lista_clientes):
                                 pass # Intento evitar error ConnectionAbortedError: [WinError 10038] - no sirvió
                             break
 
-                        if cmd == "/users":
+                        if cmd == "/usuarios":
                             respuesta = f"{VERDE}[SERVIDOR] Hay {len(lista_clientes)} clientes conectados.{RESET}"
                             conn.send(respuesta.encode('utf-8'))
                             continue
@@ -132,8 +153,8 @@ def manejar_cliente(conn, addr, lista_clientes):
                         #print(f"\n{VERDE}[{addr}] dice:\n {mensaje}{RESET}")
 
                         # Mensajes SERVIDOR/CLIENTE
-                        mensaje_servidor = input("Mensaje servidor a {addr} >>")
-                        conn.send(f"{VERDE}Eco: {mensaje_servidor}{RESET}".encode('utf-8'))
+                        #mensaje_servidor = input("Mensaje servidor a {addr} >>")
+                        #conn.send(f"{VERDE}Eco: {mensaje_servidor}{RESET}".encode('utf-8'))
 
                 else:
                     print(f'Usuario o contraseña incorrectos')
@@ -301,7 +322,7 @@ def servidorbase():
       
     try:
         servidor.bind((host, port)) # enlazo el socket con la ip y el puerto
-        servidor.listen(10) # escucha 5 peticiones en cola de espera
+        servidor.listen(10) # escucha 10 peticiones en cola de espera
         print(f'El servidor esta escuchando en {host}:{port}')
 
         clientes_activos = []

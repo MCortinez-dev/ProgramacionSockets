@@ -1,3 +1,4 @@
+import threading as th
 import socket
 import time
 
@@ -32,15 +33,21 @@ def funcion_cliente():
         # Lee la respuesta y se fija si estan mal las credenciales
         if "incorrectos" in respuesta_login or "rechazada" in respuesta_login:
             return
-
+        #--------------------------------------------------------------------------------------------
         # Charla con servidor
+
+        # Intento abrir un hilo paralelo para el mensaje a todos, asi siempre está escuchado si trabar la charla principal
+        hilo_escucha = th.Thread(target=escuchar_servidor, args=(s,), daemon=True)
+        hilo_escucha.start()
+        
         while True:
+        
             hora_actual = time.strftime("%H:%M:%S") # Guardo la hora en un formato que me sirva para mosstrar diferentes mensajes
             cosas_tipeadas = input("> ")
 
             # Al aumentar los comandos guardo lo tipeado en una variable limpia
             cmd_ingresado = cosas_tipeadas.strip().lower()
-
+            
             # Para salir
             if cmd_ingresado == "/adios":
                 s.send(cosas_tipeadas.encode('utf-8'))
@@ -60,6 +67,14 @@ def funcion_cliente():
                 s.send(cosas_tipeadas.encode('utf-8'))
                 hora_recibida = s.recv(1024).decode('utf-8')
                 print(f"\n{hora_recibida}\n")
+                continue
+
+            # Para enviar mensajes a todos los conectados
+            if cmd_ingresado == "/todos":
+                print('¿Que le quiere decir a todos los usuarios conectados?')
+                cliente_a_todos = input("-> ")
+                mensaje_completo = f"/todos {cliente_a_todos}"
+                s.send(mensaje_completo.encode('utf-8'))               
                 continue
 
              # Para trabajar con la API
@@ -86,5 +101,16 @@ def funcion_cliente():
     finally:
          s.close()
          print("Conexión cerrada.")
+
+def escuchar_servidor(s_cliente):
+    while True:
+        try:
+            mensaje = s_cliente.recv(1024).decode('utf-8')
+            if not mensaje:
+                break
+            print(f"\n{mensaje}")
+            print("> ", end="", flush=True) # Devuelve elprompt visual
+        except:
+            break
 
 funcion_cliente()
