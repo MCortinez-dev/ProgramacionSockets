@@ -33,6 +33,9 @@ def escuchar_servidor(s_cliente):
             elif "Adiós" in mensaje:
                 print(f"\n{VERDE}{mensaje}{RESET}\n")
 
+            elif "CLIENTES CONECTADOS" in mensaje:
+                print(f"\n{CIAN}{mensaje}{RESET}\n")
+
             else:
                 print(f"\n{mensaje}")
             

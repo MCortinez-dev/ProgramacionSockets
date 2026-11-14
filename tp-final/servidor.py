@@ -28,6 +28,9 @@ ROJO = "\033[31m"
 RESET = "\033[0m"
 
 #-----------------------------------------------------------------------------------------------------
+# Para permitir comunicación SERVIDOR/CLIENTE
+usuarios_conectados = {} 
+#-----------------------------------------------------------------------------------------------------
 # Funsion conectar DB
 def conectar_DB():
     try:
@@ -52,7 +55,9 @@ def conectar_DB():
 # ----------------------------------------------------------------------------------------
 # Funsión Manejar Cliente
 def manejar_cliente(conn, addr, lista_clientes):
-
+    # Para manejar clientes
+    usuario_cliente = None
+    
     # Aviso que hay una conexíon establecida
     print(f"\n{VERDE}[NUEVA CONEXIÓN] {addr} conectado.{RESET}")
     
@@ -91,15 +96,20 @@ def manejar_cliente(conn, addr, lista_clientes):
                 # Si se ejecuto la consulta significa que habia un usuario y contraseña iguales en la Base de Datos
                 if consulta_respuesta:
                     print(f"{VERDE}[AUTENTICACIÓN] {usuario_cliente} validado correctamente.{RESET}")
+                                        
+                    # Registro el usuario y su socket
+                    usuarios_conectados[conn] = usuario_cliente  
+
                     # Recibe el mensaje luego de validar y se queda charlando
                     conn.send("¡Ya podemos charlas! Bienvenido\n".encode('utf-8'))
-
+                    
                     # Manejo de comandos
                     while conectado:
                         # Recibo mensajes del cliente
                         mensaje = conn.recv(1024).decode('utf-8') # Recibe hasta 1024 bytes de datos desde el socket del cliente y los decodifica de bytes a texto (string)
                         if not mensaje:
                             break
+                        print(f"[MENSAJE RECIBIDO de {usuario_cliente}]: {mensaje}") # Vuelvo a poner la linea para que se muestre lo que hace cada cliente en su propio consola
 
                         # Como hay muchos comandos, limpio el mensaje una sola vez. Saca espacios en los extremos y pone en minúscula
                         cmd = mensaje.strip().lower()
@@ -150,7 +160,21 @@ def manejar_cliente(conn, addr, lista_clientes):
                             break
 
                         if cmd == "/usuarios":
-                            respuesta = f"[SERVIDOR] Hay {len(lista_clientes)} clientes activos conectados."
+                            # Cuento cuántos están conectados ahora
+                            cantidad = len(usuarios_conectados)
+
+                            # Uno los nombres de los usuarios en un string separado por comas
+                            nombres = ", ".join(usuarios_conectados.values())
+
+                            respuesta = f"\n[SERVIDOR] CLIENTES CONECTADOS ({cantidad}):\n"
+
+                            # Si hay alguno conectado los muestro, sino aviso que está vacío
+                            if cantidad > 0:
+                                respuesta += nombres
+                            else:
+                                respuesta += "No hay usuarios conectados."
+
+                            # Devuelvo la respuesta al cliente
                             conn.send(respuesta.encode('utf-8'))
                             continue
 
@@ -179,14 +203,17 @@ def manejar_cliente(conn, addr, lista_clientes):
             break
 
         # Al terminar la conexión
+        if conn in usuarios_conectados:
+            usuarios_conectados.pop(conn)
+
         try:
             conn.close()
         except:
             pass
-        
+
         if conn in lista_clientes:
             lista_clientes.remove(conn)
-        
+
         print(f"\n{VERDE}[DESCONEXIÓN] {addr} se ha ido. Clientes activos: {len(lista_clientes)}{RESET}")
 #----------------------------------------------------------------------------------------------------------------------------
 # Funcion utiliza request para manejar comandos de API, almacena los resultados en MySQL.
@@ -306,6 +333,66 @@ def github(comando, conn, db_up, usuario_seleccionado):
             pass
 
 #----------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------
+# Función para que el SERVIDOR hable
+def chat_servidor():
+
+    while True:
+
+        mensaje = input("\nSERVIDOR > ").strip()
+
+        if not mensaje:
+            continue
+
+        partes = mensaje.split(maxsplit=2)
+
+        # Verifico que el comando tenga sus tres partes
+        if len(partes) < 3 or partes[0].lower() != "/chat":
+            print("Uso: /chat usuario mensaje")
+            print("Para todos: /chat todos mensaje")
+            continue
+
+        destinatario = partes[1]
+        texto = partes[2]
+
+        # Enviar mensaje a todos
+        if destinatario.lower() == "todos":
+
+            for cliente_socket in list(usuarios_conectados.keys()):
+                try:
+                    cliente_socket.sendall(
+                        f"\n[SERVIDOR]: {texto}\n".encode('utf-8')
+                    )
+                except:
+                    pass
+
+            print("[SERVIDOR] Mensaje enviado a todos los clientes.")
+
+        # Enviar mensaje a un usuario específico
+        else:
+
+            encontrado = False
+
+            for cliente_socket, nombre in list(usuarios_conectados.items()):
+
+                if nombre == destinatario:
+
+                    try:
+                        cliente_socket.sendall(
+                            f"\n[SERVIDOR PRIVADO]: {texto}\n".encode('utf-8')
+                        )
+                        encontrado = True
+
+                    except:
+                        pass
+
+            if encontrado:
+                print(f"[SERVIDOR] Mensaje enviado a {destinatario}.")
+            else:
+                print(f"[ERROR] El usuario '{destinatario}' no está conectado.")
+
+
+#----------------------------------------------------------------------------------------------------------------------------
 # Funcion servidor (invoca el poder de las otras funciones)
 def servidorbase():
     host = '127.0.0.1' # la ip del servidor en localhost
@@ -318,7 +405,13 @@ def servidorbase():
         servidor.listen(10) # escucha 10 peticiones en cola de espera
         
         clientes_activos = []
+        
         print(f'El servidor esta escuchando en {host}:{port}')
+
+        # Inicio el hilo que permite escribir desde la consola del servidor
+        hilo_chat = th.Thread(target=chat_servidor, daemon=True)
+        hilo_chat.start()
+        
 
         while True:
             conn, addr = servidor.accept()

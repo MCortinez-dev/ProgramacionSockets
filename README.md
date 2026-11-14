@@ -1,5 +1,4 @@
 Markdown
-
 # ✨ Programación Sobre Redes
 
 El presente Proyecto desarrollado la teoría y práctica para la Programación sobre Redes utilizando Sockets TCP (`AF_INET`, `SOCK_STREAM`) y concurrencia con hilos (`threading`) en Python. El mismo contine tres carpetas pricipales:
@@ -40,8 +39,8 @@ Mas abajo se detalla una explicación general y el funcionamiento del 1er ejerci
 
 ### 🌟 Opción Automática (Recomendada)
 Para simular el entorno completo con el servidor, el cliente interactivo y múltiples bots corriendo en paralelo con un solo clic:
-* **En Windows:** Ejecuta el archivo `lanzar_todo.bat`
-* **En Linux:** Ejecuta el script `./lanzar_todo.sh`
+* **En Windows:** Ejecuta el archivo `lanzador_automatico_linux.sh`
+* **En Linux:** Ejecuta el script `lanzador_automatico_windows.bat`
 
 ### 🛠️ Opción Manual
 1. Inicia el servidor en una terminal:
@@ -105,9 +104,11 @@ python cliente.py
 
 * El sistema te solicitará por consola tus credenciales de acceso (puedes utilizar el usuario administrador por defecto: **Usuario:** `admin` | **Contraseña:** `admin123`).
 
-### ⌨️ Comandos Disponibles en el Chat del TP Final
+### ⌨️ Comandos Disponibles en el Chat en CLIENTE & en SERVIDOR
 
 Una vez autenticado con éxito en el servidor, puedes utilizar los siguientes comandos escribiendolos en la consola:
+
+#### Lado cliente
 
 * `/usuarios`: Consulta en tiempo real la cantidad de clientes activos conectados al servidor.
 * `/hora`: Solicita y muestra la hora actual del servidor.
@@ -116,6 +117,11 @@ Una vez autenticado con éxito en el servidor, puedes utilizar los siguientes co
 * `/followers [usuario_github]`: Consulta los seguidores de un usuario en la API de GitHub y los guarda de forma persistente en la tabla `followers`.
 * `/adios`: Finaliza la sesión de manera ordenada, cerrando el socket, notificando al servidor y liberando los recursos activos.
 * *Texto libre:* Envía un mensaje general de chat con marcas de tiempo y formato de colores ANSI.
+
+#### Lado servidor
+
+* `/chat todos [mensaje]`: Envía un mensaje a todos los clientes autenticados que se encuentren conectados al servidor.
+* `/chat [usuario] [mensaje]`: Envía un mensaje privado a todas las sesiones conectadas que correspondan al nombre de usuario indicado. Si un mismo usuario inició varias sesiones, todas recibirán el mensaje.
 
 ### 😼 Usuarios de prueba para comandos GitHub
 
