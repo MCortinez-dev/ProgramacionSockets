@@ -1,10 +1,26 @@
-import threading as th
+import threading as th # Para el hilo que siempre espera el mensaje de /todos
 import socket
-import time
+import time # Para obtener la hora
 
-SUPERMAGENTA = "\033[1;4;95m" # negrira - subrayado - magenta brillante
-CIAN = "\033[36m"
-RESET = "\033[0m"
+# Definición de colores para la consola
+SUPERMAGENTA = "\033[1;4;95m"  # Negrita, subrayado, magenta brillante
+VERDE = "\033[32m"             # Verde estándar
+CIAN = "\033[36m"              # Cían
+ROJO = "\033[31m"              # Rojo para errores
+RESET = "\033[0m"              # Reset de formato
+
+def escuchar_servidor(s_cliente):
+    # Hilo secundario dedicado a escuchar permanentemente mensajes del servidor.
+    while True:
+        try:
+            mensaje = s_cliente.recv(1024).decode('utf-8')
+            if not mensaje:
+                break
+            print(f"\n{mensaje}")
+            print("> ", end="", flush=True) # Restaura el prompt visual de la terminal, evita atascos
+        except:
+            break
+
 
 def funcion_cliente():
     host = "127.0.0.1"
@@ -12,7 +28,7 @@ def funcion_cliente():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         s.connect((host, port))
-        print("Conectado al servidor")
+        print(f"{VERDE}[CONEXIÓN] Conectado al servidor exitosamente.{RESET}")
                   
         # Valido al usuario - lado cliente
         valido_usuario = s.recv(1024).decode('utf-8')
@@ -34,12 +50,11 @@ def funcion_cliente():
         if "incorrectos" in respuesta_login or "rechazada" in respuesta_login:
             return
         #--------------------------------------------------------------------------------------------
-        # Charla con servidor
-
-        # Intento abrir un hilo paralelo para el mensaje a todos, asi siempre está escuchado si trabar la charla principal
+        # Intento abrir un hilo paralelo para el mensaje a /todos, asi siempre está escuchado si trabar la charla principal
         hilo_escucha = th.Thread(target=escuchar_servidor, args=(s,), daemon=True)
         hilo_escucha.start()
-        
+
+        # Charla con servidor
         while True:
         
             hora_actual = time.strftime("%H:%M:%S") # Guardo la hora en un formato que me sirva para mosstrar diferentes mensajes
@@ -52,17 +67,17 @@ def funcion_cliente():
             if cmd_ingresado == "/adios":
                 s.send(cosas_tipeadas.encode('utf-8'))
                 despedida = s.recv(1024).decode('utf-8')
-                print(despedida)
+                print(f"{VERDE}{despedida}{RESET}")
                 break
 
-            # Para recivir lista usuarios conectados
-            if cmd_ingresado == "/users":
+            # Para recibir lista usuarios conectados
+            if cmd_ingresado == "/usuarios":
                 s.send(cosas_tipeadas.encode('utf-8'))
-                respuesta_servidor = s.recv(1024).decode('utf-8')
-                print(f"\n{respuesta_servidor}\n")
+                lista_conectados = s.recv(1024).decode('utf-8')
+                print(f"\n{lista_conectados}\n")
                 continue
 
-            # Para recivir la hora
+            # Para recibir la hora
             if cmd_ingresado == "/hora":
                 s.send(cosas_tipeadas.encode('utf-8'))
                 hora_recibida = s.recv(1024).decode('utf-8')
@@ -71,7 +86,7 @@ def funcion_cliente():
 
             # Para enviar mensajes a todos los conectados
             if cmd_ingresado == "/todos":
-                print('¿Que le quiere decir a todos los usuarios conectados?')
+                print(f"{CIAN}¿Qué le quiere decir a todos los usuarios conectados?{RESET}")
                 cliente_a_todos = input("-> ")
                 mensaje_completo = f"/todos {cliente_a_todos}"
                 s.send(mensaje_completo.encode('utf-8'))               
@@ -88,7 +103,7 @@ def funcion_cliente():
                 continue
             
             # Mensaje general - es posible que me genere errores (evaluar limpiar)
-            msg = f"{CIAN}[{hora_actual}] Soy un cliente que ingresa datos por el teclado [para dejar de escribir = /adios] > este es el mensaje =>>> {RESET} {SUPERMAGENTA}{cosas_tipeadas}\n{RESET}"
+            msg = f"{CIAN}[{hora_actual}] Mensaje general =>>> {RESET}{SUPERMAGENTA}{cosas_tipeadas}{RESET}\n"
             s.send(msg.encode('utf-8'))             
 
             # Recibo respuesta servidor
@@ -97,20 +112,11 @@ def funcion_cliente():
 
 
     except ConnectionRefusedError:
-        print("No se pudo conectar al servidor(sevidor rechazo la conexion)")
+        print(f"{ROJO}[ERROR] No se pudo conectar al servidor (conexión rechazada).{RESET}")
     finally:
          s.close()
          print("Conexión cerrada.")
+         print(f"{VERDE}Conexión cerrada.{RESET}")
 
-def escuchar_servidor(s_cliente):
-    while True:
-        try:
-            mensaje = s_cliente.recv(1024).decode('utf-8')
-            if not mensaje:
-                break
-            print(f"\n{mensaje}")
-            print("> ", end="", flush=True) # Devuelve elprompt visual
-        except:
-            break
-
-funcion_cliente()
+if __name__ == "__main__":
+    funcion_cliente()

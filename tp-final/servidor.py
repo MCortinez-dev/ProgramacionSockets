@@ -1,11 +1,11 @@
 #Importar librerias a usar
-import socket
+import socket # The socket module provides low-level networking interface for creating network connections.
 import threading as th # Multihilos
 
 # Base de datos
 import mysql.connector # Base de datos
 from mysql.connector import Error
-import os # Nueva forma que encontre importa cosas del sistema operativo (probar)
+import os # usar funcionalidades dependientes del sistema operativo (es muy grande evaluar importar solo un modulo)
 from dotenv import load_dotenv  # pip install python-dotenv
 
 # The requests module allows you to send HTTP requests using Python.
@@ -17,6 +17,12 @@ import time
 #-----------------------------------------------------------------------------------------------------
 # Cargo variables entorno
 load_dotenv()
+
+#-----------------------------------------------------------------------------------------------------
+# Configuración de colores para la consola del servidor
+VERDE = "\033[32m"
+ROJO = "\033[31m"
+RESET = "\033[0m"
 
 #-----------------------------------------------------------------------------------------------------
 # Funsion conectar DB
@@ -34,28 +40,25 @@ def conectar_DB():
     
     except Error as err:
         if err.errno == mysql.connector.errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Algo está mal con tu nombre de usuario o contraseña")
+            print(f"{ROJO}[DB ERROR] Usuario o contraseña incorrectos.{RESET}")
         elif err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
-            print("La base de datos no existe")
+            print(f"{ROJO}[DB ERROR] La base de datos especificada no existe.{RESET}")
         else:
-            print(f"Error: {err}")
+            print(f"{ROJO}[DB ERROR] {err}{RESET}")
 
 # ----------------------------------------------------------------------------------------
 # Funsión Manejar Cliente
 def manejar_cliente(conn, addr, lista_clientes):
 
     # Aviso que hay una conexíon establecida
-    print(f"\n[NUEVA CONEXIÓN] {addr} conectado.")
+    print(f"\n{VERDE}[NUEVA CONEXIÓN] {addr} conectado.{RESET}")
     
     # Conecto a la base de datos
     db_up = conectar_DB()
     if db_up:
-        print(f"La base de datos existe y la encontramos a traves del puerto 3306")
+        print(f"{VERDE}[DB OK]La base de datos existe y la encontramos a traves del puerto 3306{RESET}")
     else:
-        print(f"Hay un prblema en la base de datos")
-
-    VERDE = "\033[3;32m"
-    RESET = "\033[0m"
+        print(f"{ROJO}[DB ALERTA] Problema al conectar con la base de datos.{RESET}")
     
     conectado = True
     while conectado:
@@ -81,10 +84,11 @@ def manejar_cliente(conn, addr, lista_clientes):
                 
                 # Si se ejecuto la consulta significa que habia un usuario y contraseña iguales en la Base de Datos
                 if consulta_respuesta:
-                    print(f'{usuario_cliente} tu usuario y contraseña son correctos')
+                    print(f"{VERDE}[AUTENTICACIÓN] {usuario_cliente} validado correctamente.{RESET}")
                     # Recibe el mensaje luego de validar y se queda charlando
                     conn.send("¡Ya podemos charlas! Bienvenido\n".encode('utf-8'))
-                    
+
+                    # Manejo de comandos
                     while conectado:
                         # Recibo mensajes del cliente
                         mensaje = conn.recv(1024).decode('utf-8') # Recibe hasta 1024 bytes de datos desde el socket del cliente y los decodifica de bytes a texto (string)
@@ -94,45 +98,43 @@ def manejar_cliente(conn, addr, lista_clientes):
                         # Como hay muchos comandos, limpio el mensaje una sola vez. Saca espacios en los extremos y pone en minúscula
                         cmd = mensaje.strip().lower()
 
-                        # Cliente X manda de su consola a todos - lo pongo aca para que lo verifique a penas revisa sus credenciales
+                        # Cliente X manda de su consola a todos
                         if cmd.startswith("/todos"):
                             partes = mensaje.split(maxsplit=1) # Separa por espacios, para ver si me lee el nombre de usuario que busco
 
                             # Si tiene algo escrito para todos lo agarro, guardo y envío
                             if len(partes) > 1:
                                 mensaje_a_todos = partes[1]
-                                texto_a_enviar = f"\n[Mensaje a todo el mundo de {addr}]: {mensaje_a_todos}\n"
-                                #respuesta_remitente = f"\n[SERVIDOR] Mensaje enviado a todos los usuarios con éxito.\n"
+                                texto_a_enviar = f"\n[MENSAJE GLOBAL de {usuario_cliente}]: {mensaje_a_todos}\n"
                             else:
-                                texto_a_enviar = f"\n[Mensaje a todo el mundo de {addr}]: NADA de NADA\n" # Si mandó solo algo vacio
-                                #respuesta_remitente = f"\n[SERVIDOR] No escribiste nada para enviar.\n"
+                                texto_a_enviar = f"\n[MENSAJE GLOBAL de {usuario_cliente}]: (vacío)\n" # Si mandó solo algo vacio
                             
                             # PRobar poninedo clientes boots si los recorre y les envia el mensaje
                             for cliente_socket in lista_clientes.copy():
                                 try:
                                     cliente_socket.sendall(texto_a_enviar.encode('utf-8'))
                                 except:
-                                    pass # Para evitar errores ?? probar                            
+                                    pass                            
                             continue
 
-                        # Si el mensaje empieza con los comandos de GitHub
+                        # Comandos interactuar API de GitHub
                         if cmd.startswith("/repos") or cmd.startswith("/followers"):
                             partes = cmd.split() # Separa por espacios, para ver si me lee el nombre de usuario que busco
                             tipo_comando = partes[0] # "/repos"
                             
-                            # Cuando escriba un usuario va a habeer dos partes en el mensaje
+                            # Cuando escriba un usuario va a haber dos partes en el mensaje
                             if len(partes) > 1:
                                 usuario_seleccionado = partes[1]
                             else:
                                 usuario_seleccionado = "" # Si mandó solo /repos vacío
 
-                            # Ahora si intento ir a la función pero con un nuevo argumento
+                            # Inicio la funcion correspondiente con todos los argumentos
                             github(tipo_comando, conn, db_up, usuario_seleccionado)
                             continue
 
                         # Intento evitar error ConnectionAbortedError: [WinError 10053]
                         if cmd == "/adios":
-                            print(f"{VERDE}[{addr}] solicitó desconexión (/adios).{RESET}")
+                            print(f"{VERDE}[DESCONEXIÓN SOLICITADA] {addr} ({usuario_cliente}){RESET}")
                             try:
                                 conn.send("¡Adiós! Cerrando conexión...".encode('utf-8'))
                             except:
@@ -140,49 +142,41 @@ def manejar_cliente(conn, addr, lista_clientes):
                             break
 
                         if cmd == "/usuarios":
-                            respuesta = f"{VERDE}[SERVIDOR] Hay {len(lista_clientes)} clientes conectados.{RESET}"
+                            respuesta = f"[SERVIDOR] Hay {len(lista_clientes)} clientes activos conectados."
                             conn.send(respuesta.encode('utf-8'))
                             continue
 
                         if cmd == "/hora":
                             hora_actual = time.strftime("%H:%M:%S") # Guardo la hora en un formato que sirva para verse en la respuesta
-                            respuesta = f"{VERDE}[SERVIDOR] La hora actual es {hora_actual}.{RESET}"
+                            respuesta = f"{VERDE}[SERVIDOR] La hora actual del servidor es {hora_actual}.{RESET}"
                             conn.send(respuesta.encode('utf-8'))
                             continue
-                        
-                        #print(f"\n{VERDE}[{addr}] dice:\n {mensaje}{RESET}")
-
-                        # Mensajes SERVIDOR/CLIENTE
-                        #mensaje_servidor = input("Mensaje servidor a {addr} >>")
-                        #conn.send(f"{VERDE}Eco: {mensaje_servidor}{RESET}".encode('utf-8'))
 
                 else:
-                    print(f'Usuario o contraseña incorrectos')
+                    print(f"{ROJO}[AUTENTICACIÓN FALLIDA] Credenciales incorrectas para '{usuario_cliente}'.{RESET}")
                     conn.send("Usuario o contraseña incorrectos. Conexión rechazada.\n".encode('utf-8'))
                     break
         
             else:
-                print("Problema con la DB")
+                conn.send("Error interno: Sin conexión a la base de datos.\n".encode('utf-8'))
                 break
 
         except Exception as e:
-            print(f"Error inesperado en el cliente: {e}")
+            print(f"{ROJO}[ERROR EN CLIENTE] {e}{RESET}")
             break
 
         # Al terminar la conexión
         try:
             conn.close()
-            # Elimina este socket de la lista global de clientes
         except:
             pass
         
         if conn in lista_clientes:
             lista_clientes.remove(conn)
         
-        print(f"\n[DESCONEXIÓN] {addr} se ha ido.")
-        print(f"[CLIENTES ACTIVOS] {len(lista_clientes)}")
+        print(f"\n{VERDE}[DESCONEXIÓN] {addr} se ha ido. Clientes activos: {len(lista_clientes)}{RESET}")
 #----------------------------------------------------------------------------------------------------------------------------
-# Funcion utiliza request para manejar comandos de API
+# Funcion utiliza request para manejar comandos de API, almacena los resultados en MySQL.
 def github(comando, conn, db_up, usuario_seleccionado):
 
     try:
@@ -199,21 +193,20 @@ def github(comando, conn, db_up, usuario_seleccionado):
         # Preparo puente SQL
         cursor = db_up.cursor()
 
-        #---------------------------------------------------------------------------------------------
-        # Cuando el cliente usa el comando /repos
+        # Para resolver problema 403, arme una token de github
+        token_github = os.getenv("GITHUB_TOKEN")
+
+        # Agrego user agente en header: All API requests must include a valid User-Agent header. The User-Agent header identifies the user or application that is making the request.
+        headers = {
+            'X-GitHub-Api-Version': '2026-03-10',
+            'User-Agent': 'MCortinez-Project',
+            'Authorization': f'Bearer {token_github}'
+        }
+
+        # --- Comando /repos ---
         if comando == "/repos":
-            # Para resolver problema 403, arme una token de github
-            token_github = os.getenv("GITHUB_TOKEN")
-            
             # URLs de la API, agrego el usuario seleccionado
             url_repo = f'https://api.github.com/users/{usuario_seleccionado}/repos'
-
-            # Agrego user agente en header: All API requests must include a valid User-Agent header. The User-Agent header identifies the user or application that is making the request.       
-            headers = {
-                'X-GitHub-Api-Version': '2026-03-10',
-                'User-Agent': 'MCortinez-Project',
-                'Authorization': f'Bearer {token_github}'
-                }
 
             # Tomo de la url armada antes la info de los repos que tiene. La docu actual pide un header
             datos_url_repo = requests.get(url_repo, headers=headers)
@@ -223,7 +216,7 @@ def github(comando, conn, db_up, usuario_seleccionado):
                 # Guardo el json que traje con el GET
                 repositorios = datos_url_repo.json()
 
-                # Parte de arriba intento de tabla guardada
+                # Parte de arriba intento de tabla guardada para mostrar en consola
                 confirmacion_guardado = f"\n--- REPOSITORIOS DE: {usuario_seleccionado} ---\n"
 
                 # Recorrer cada repositorio, tomar datos e insertarlos en la base de datos
@@ -249,27 +242,17 @@ def github(comando, conn, db_up, usuario_seleccionado):
                 conn.send(confirmacion_guardado.encode('utf-8'))
 
             else:
-                conn.send(f"Error al consultar repositorios: {datos_url_repo.status_code}\n".encode('utf-8'))
+                conn.send(f"Error al consultar repositorios: (CÓDIGO HTTP:{datos_url_repo.status_code})\n".encode('utf-8'))
 
 
         elif comando == "/followers": # Cuando usa el otro comando
-            # Para resolver problema 403, usamos el token
-            token_github = os.getenv("GITHUB_TOKEN")
             # URL followers
             url_followers = f'https://api.github.com/users/{usuario_seleccionado}/followers'
-
-            #Headers con el token agregado
-            headers = {
-            'X-GitHub-Api-Version': '2026-03-10',
-            'User-Agent': 'MCortinez-Project',
-            'Authorization': f'Bearer {token_github}'
-            }
             
             # Teniendo muchas variables configuradas arriba le inicio la consulta
             datos_url_followers = requests.get(url_followers, headers=headers)
 
             if datos_url_followers.status_code == 200:
-
                 followers = datos_url_followers.json()
 
                 #Muestreo de followers
@@ -298,14 +281,14 @@ def github(comando, conn, db_up, usuario_seleccionado):
                 conn.send(f_guardado.encode('utf-8'))
 
             else:
-                conn.send(f"Error al consultar seguidores: {datos_url_followers.status_code}\n".encode('utf-8'))                   
+                conn.send(f"Error al consultar seguidores: (CÓDIGO HTTP{datos_url_followers.status_code})\n".encode('utf-8'))                   
             
         cursor.close()
 
     except Exception as e:
-        print(f"Error en la función github: {e}")
+        print(f"{ROJO}[ERROR EN MÓDULO GITHUB] {e}{RESET}")
         try:
-            conn.send("Ocurrió un error interno en el servidor al procesar GitHub.\n".encode('utf-8'))
+            conn.send("Ocurrió un error interno en el servidor al procesar la API de GitHub.\n".encode('utf-8'))
         except:
             pass
 
@@ -316,17 +299,13 @@ def servidorbase():
     port = 49152
     servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creo el socket  ipv4(AF_INET) y tcp(SOCK_STREAM)
     servidor.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # para permitir la reutilizacion de la direccion
-
-    VERDE = "\033[3;32m"
-    RESET = "\033[0m"    
-      
+   
     try:
         servidor.bind((host, port)) # enlazo el socket con la ip y el puerto
         servidor.listen(10) # escucha 10 peticiones en cola de espera
-        print(f'El servidor esta escuchando en {host}:{port}')
-
+        
         clientes_activos = []
-        print(f"{VERDE}[INICIO] Servidor escuchando en el puerto 49152...{RESET}")
+        print(f'El servidor esta escuchando en {host}:{port}')
 
         while True:
             conn, addr = servidor.accept()
@@ -335,17 +314,15 @@ def servidorbase():
             # Crear hilo para el nuevo cliente
             hilo = th.Thread(target=manejar_cliente, args=(conn, addr, clientes_activos))
             hilo.start()
-
-            # Intente agregar join pero me trabó todo
-            # hilo.join()
             
             print(f"{VERDE}[CLIENTES ACTIVOS] {len(clientes_activos)}{RESET}")
 
     except KeyboardInterrupt:
-        print('Servidor detenido')
+        print(f"\n{VERDE}[SERVIDOR DETENIDO] Apagando el servidor de forma segura.{RESET}")
     except ConnectionResetError:
-        print(f'{VERDE}Conexion cerrada por el cliente{RESET}')
+        print(f"{ROJO}[ERROR] Conexión restablecida abruptamente.{RESET}")
     finally:
         servidor.close()
 
-servidorbase()
+if __name__ == "__main__":
+    servidorbase()
