@@ -1,84 +1,120 @@
-# socket.socket
-```bash
-class socket.socket(family=AF_INET, type=SOCK_STREAM, proto=0, fileno=None) # creo el socket  ipv4(AF_INET) y tcp(SOCK_STREAM)
+# Apuntes y Referencias: Módulo de Sockets en Python
+
+## 1. Creación y Configuración del Socket
+
+```python
+class socket.socket(family=AF_INET, type=SOCK_STREAM, proto=0, fileno=None)
+
 ```
-- Create a new socket using the given address family, socket type and protocol number. The address family should be AF_INET (the default), AF_INET6, AF_UNIX, AF_CAN, AF_PACKET, or AF_RDS. 
-- The socket type should be SOCK_STREAM (the default), SOCK_DGRAM, SOCK_RAW or perhaps one of the other SOCK_ constants. 
-- The protocol number is usually zero and may be omitted or in the case where the address family is AF_CAN the protocol should be one of CAN_RAW, CAN_BCM, CAN_ISOTP or CAN_J1939.
-- If fileno is specified, the values for family, type, and proto are auto-detected from the specified file descriptor. 
-- Auto-detection can be overruled by calling the function with explicit family, type, or proto arguments. This only affects how Python represents e.g. the return value of socket.getpeername() but not the actual OS resource. Unlike socket.fromfd(), fileno will return the same socket and not a duplicate. This may help close a detached socket using close().
-- The newly created socket is non-inheritable.
+
+* **Descripción:** Crea un nuevo socket utilizando la familia de direcciones, el tipo de socket y el número de protocolo especificados.
+* **Parámetros:**
+* `family`: `AF_INET` (por defecto para IPv4), `AF_INET6`, `AF_UNIX`, `AF_CAN`, `AF_PACKET`, o `AF_RDS`.
+* `type`: `SOCK_STREAM` (por defecto para TCP), `SOCK_DGRAM`, `SOCK_RAW`, entre otras constantes `SOCK_`.
+* `proto`: Número de protocolo (por defecto `0`, se puede omitir).
+* `fileno`: Si se especifica, los valores de `family`, `type` y `proto` se detectan automáticamente a partir del descriptor de archivo indicado.
+
+
+* **Propiedad:** El socket recién creado es **no heredable** (*non-inheritable*).
+
 ---
-# socket.create_connection
-```bash
+
+## 2. Conexión Avanzada de Clientes
+
+```python
 socket.create_connection(address, timeout=GLOBAL_DEFAULT, source_address=None, *, all_errors=False)
+
 ```
-- Connect to a TCP service listening on the internet address (a 2-tuple (host, port)), and return the socket object. This is a higher-level function than socket.connect(): if host is a  non-numeric hostname, it will try to resolve it for both AF_INET and AF_INET6, and then try to connect to all possible addresses in turn until a connection succeeds. This makes it easy to write clients that are compatible to both IPv4 and IPv6.
-- Passing the optional timeout parameter will set the timeout on the socket instance before attempting to connect. If no timeout is supplied, the global default timeout setting returned by getdefaulttimeout() is used.
-- If supplied, source_address must be a 2-tuple (host, port) for the socket to bind to as its source address before connecting. If host or port are ‘’ or 0 respectively the OS default behavior will be used.
-- When a connection cannot be created, an exception is raised. By default, it is the exception from the last address in the list. If all_errors is True, it is an ExceptionGroup containing the errors of all attempts.
+
+* **Descripción:** Conecta a un servicio TCP que escucha en una dirección de Internet (tupla de 2 elementos `(host, port)`) y retorna el objeto socket.
+* **Ventajas frente a `socket.connect()`:** Es una función de nivel superior. Si el `host` es un nombre de host no numérico, intentará resolverlo tanto para `AF_INET` como para `AF_INET6`, probando todas las direcciones posibles de manera secuencial hasta que una conexión prospere (ideal para compatibilidad dual).
+* **Parámetros opcionales:**
+* `timeout`: Configura el tiempo de espera en el socket antes de intentar la conexión.
+* `source_address`: Tupla `(host, port)` para enlazar la dirección de origen antes de conectar.
+* `all_errors`: Si está en `True`, ante un fallo general retorna un `ExceptionGroup` con los errores de todos los intentos.
+
+
+
 ---
-# setsockopt
-```bash
+
+## 3. Opciones de Configuración Avanzada (`setsockopt`)
+
+```python
 setsockopt(level, optname, value: int | Buffer)
 setsockopt(level, optname, None, optlen: int)
+
 ```
-- Set the value of the given socket option (see the Unix manual page setsockopt(2)). The needed symbolic constants are defined in this module (SO_* etc. <socket-unix-constants>).
-- The value can be an integer, None or a bytes-like object representing a buffer.
-- In the latter case it is up to the caller to ensure that the bytestring contains the proper bits (see the optional built-in module struct for a way to encode C structures as bytestrings).
-- When value is set to None, optlen argument is required. It’s equivalent to calling setsockopt() C function with optval=NULL and optlen=optlen.
+
+* **Descripción:** Permite configurar opciones a bajo nivel en el socket (equivalente a la función `setsockopt` de la API de C en sistemas Unix).
+
+### Opciones principales y su utilidad práctica en servidores:
+
+* **`0. socket.SOL_SOCKET` (El Nivel):**
+* Indica al sistema operativo que la configuración pertenece a la capa general de sockets y no a un protocolo específico como TCP (`IPPROTO_TCP`).
+
+
+* **1. `SO_REUSEADDR` (Nivel: `socket.SOL_SOCKET`):**
+* Permite reutilizar la dirección IP y el puerto de forma inmediata.
+* **Uso:** Evita el error clásico de *"Address already in use"* (Dirección ya en uso) cuando cerrás un servidor y querés volver a levantarlo rápidamente.
+
+
+* **2. `SO_KEEPALIVE` (Nivel: `socket.SOL_SOCKET`):**
+* Activa señales automáticas de "latido" (*heartbeat*) en segundo plano.
+* **Uso:** Detecta si un cliente pierde la conexión de forma abrupta (se apaga el dispositivo o se corta el Wi-Fi) sin enviar un cierre formal, liberando memoria en el servidor.
+
+
+* **3. `TCP_NODELAY` (Nivel: `socket.IPPROTO_TCP`):**
+* Desactiva el *Algoritmo de Nagle* (sistema que agrupa pequeños paquetes para ahorrar ancho de banda).
+* **Uso:** Fundamental para aplicaciones en tiempo real (chats interactivos, juegos online) donde cada `send()` debe enviarse de inmediato sin demoras.
+
+
+* **4. `SO_RCVBUF` y `SO_SNDBUF` (Nivel: `socket.SOL_SOCKET`):**
+* Modifican el tamaño (en bytes) de los búferes de recepción y envío del sistema operativo.
+* **Uso:** Optimización avanzada para transferencia masiva de datos (archivos pesados o streaming).
+
+
+* **5. `SO_BROADCAST` (Nivel: `socket.SOL_SOCKET`):**
+* Autoriza a un socket (habitualmente UDP) a enviar mensajes de difusión a toda la red local.
+* **Uso:** Aplicaciones de descubrimiento automático de servidores en una misma red Wi-Fi.
+
+
+
 ---
-# servidor.setsockopt
-```bash
-servidor.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-```
 
-0.  socket.SOL_SOCKET (El Nivel): Le indica al sistema operativo que la configuración que vamos a cambiar pertenece a la capa de sockets en 
-    general (Socket Layer), y no a un protocolo específico como TCP (IPPROTO_TCP).
+## 4. Análisis de Excepción: Error al salir (`/adios`)
 
-1. SO_REUSEADDR (Nivel: socket.SOL_SOCKET)
-    Permite reutilizar la dirección IP y el puerto de forma inmediata.
-    Evita el error de "Address already in use" (Dirección ya en uso) cuando cierra un servidor y quiere iniciar rapidamente.
+### Traza del Error (Log del Sistema)
 
-2. SO_KEEPALIVE (Nivel: socket.SOL_SOCKET)
-    Activa señales automáticas de "latido" (heartbeat) en segundo plano.
-    Si un cliente pierde la conexión a internet de forma brusca (ej. apaga el celular o se corta el Wi-Fi) sin avisar, el sistema operativo usa esto para detectarlo y cerrar el socket liberando memoria, en lugar de dejar el servidor esperando indefinidamente.
-
-3. TCP_NODELAY (Nivel: socket.IPPROTO_TCP)
-    Desactiva el Algoritmo de Nagle (un sistema que agrupa pequeños paquetes de datos para ahorrar ancho de banda).
-    Al desactivarlo, cada vez que haces send(), el dato se envía inmediatamente por la red sin esperar. Es fundamental para aplicaciones en tiempo real donde la velocidad es crítica (como chats interactivos, juegos online o control remoto).
-
-4. SO_RCVBUF y SO_SNDBUF (Nivel: socket.SOL_SOCKET)
-    Modifica el tamaño (en bytes) de los búferes de recepción (RCV) y envío (SND) del sistema operativo para ese socket.
-    Se usa en proyectos avanzados para optimizar el rendimiento si necesitas transferir una cantidad masiva de datos (como enviar archivos pesados o streaming de video).
-
-5. SO_BROADCAST (Nivel: socket.SOL_SOCKET)
-    Autoriza a un socket (generalmente usando UDP) a enviar mensajes de difusión a toda la red local en lugar de a una IP específica.
-    Se usa en aplicaciones tipo "descubrimiento de servidores", donde un programa busca automáticamente otros dispositivos conectados a la misma red Wi-Fi sin conocer sus IPs de antemano.
-
--------------------------------------------------------------------------------------------------------------------------
-
-# Bibliofrafia
-# https://docs.python.org/3/library/socket.html
-# https://docs.python.org/3/library/socketserver.html#module-socketserver
-# https://docs.python.org/3/library/threading.html
-# https://elpythonista.com/f-strings-python
-# https://ierwinx.com/python/terminal/colores-y-estilos.html
-
-----------------------------------------------------------------------------------------------------------------------------
-
-Error al salir
-
+```text
 [('127.0.0.1', 28441)] dice: /adios
 Exception in thread Thread-1 (manejar_cliente):
 Traceback (most recent call last):
   File "C:\Users\fudom\AppData\Local\Python\pythoncore-3.14-64\Lib\threading.py", line 1082, in _bootstrap_inner
     self._context.run(self.run)
-    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
   File "C:\Users\fudom\AppData\Local\Python\pythoncore-3.14-64\Lib\threading.py", line 1024, in run
     self._target(*self._args, **self._kwargs)
-    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "d:\Git-Hub\Sockets\cliente-servidor-cortinez\servidor.py", line 14, in manejar_cliente
-    mensaje = conn.recv(1024).decode('utf-8') # Recibe hasta 1024 bytes de datos desde el socket del cliente y los decodifica de bytes a texto (string)
-              ~~~~~~~~~^^^^^^
+    mensaje = conn.recv(1024).decode('utf-8') 
 ConnectionAbortedError: [WinError 10053] Se ha anulado una conexión establecida por el software en su equipo host
+
+```
+
+### Diagnóstico del Problema:
+
+* **Excepción:** `ConnectionAbortedError: [WinError 10053]`
+* **Causa:** Ocurre en el hilo del servidor cuando el cliente corta la conexión de manera abrupta (o envía el comando `/adios` y cierra el socket del lado cliente sin dar tiempo a que el servidor complete el ciclo de lectura pendiente en `conn.recv()`). El sistema operativo Windows aborta la tubería de comunicación activa de forma imprevista.
+* **Solución recomendada:** Envolver siempre las operaciones de lectura/escritura del servidor (`conn.recv()` / `conn.send()`) dentro de bloques estructurados de manejo de excepciones (`try-except`) para interceptar la desconexión limpia sin que colapse el hilo del cliente.
+
+---
+
+## 5. Bibliografía y Enlaces de Interés
+
+* **Documentación Oficial Python:**
+* [Módulo Socket](https://docs.python.org/3/library/socket.html)
+* [Módulo SocketServer](https://docs.python.org/3/library/socketserver.html#module-socketserver)
+* [Módulo Threading](https://docs.python.org/3/library/threading.html)
+
+
+* **Guías y Recursos Externos:**
+* [Uso de F-Strings en Python (El Pythonista)](https://elpythonista.com/f-strings-python)
+* [Colores y Estilos en la Terminal (Ierwinx)](https://ierwinx.com/python/terminal/colores-y-estilos.html)
