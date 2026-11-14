@@ -3,7 +3,7 @@
 ## 📒 Consigna
 - [x] 1)​ Realizar un programa de sockets Cliente Servidor concurrente donde el cliente al conectarse debe enviar su nombre de usuario y contraseña.
 - [x] 2)​ Este nombre de usuario y contraseña deben validarse en una base de datos. 
-- [ ] 2.1) Extra mio: Intentar usar bcript 
+- [x] 2.1) Extra mio: Intentar usar encriptación contraseña 
 - [x] 3)​ Si el usuario o contraseña son incorrectos se debe informar al cliente y cerrar sesión. Si el nombre de usuario y contraseña son validos el servidor tiene que enviar un mensajde bienvenida.
 - [x] 4)​ El cliente debe poder chatear con el servidor y viceversa
 - [x] 5)​ Cuando el mensaje del cliente esté precedido por una “/” quiere decir que se trata de un comando

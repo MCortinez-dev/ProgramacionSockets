@@ -13,16 +13,20 @@ Otros comandos útiles para manejarse en elentorno
 -- Creo la base de datos por si no existe:
 CREATE DATABASE IF NOT EXISTS `base-datos`;
 -----------------------------------------------------------------------------------------------------------------------
--- Creo las tablas usuario:
-create TABLE usuarios (
+-- Creo la tabla usuarios
+CREATE TABLE `usuarios` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
     `nombre` VARCHAR(50) UNIQUE NOT NULL,
     `clave_encrip` VARCHAR(255) NOT NULL
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci; --ultima parte buenas practicas evita errores
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---Intento de harcodear un usuario, si llego intento CRUD usuario (Usuario: admin | Contraseña: admin123):
+-- Inserta los 5 usuarios con sus claves ya convertidas a hash SHA-256 hexadecimal:
 INSERT INTO `usuarios` (`id`, `nombre`, `clave_encrip`) VALUES
-(1, 'admin', 'admin123');
+(1, 'admin',    SHA2('admin123', 256)),
+(2, 'Redes-1',  SHA2('prog456', 256)),
+(3, 'Redes-2',  SHA2('prog789', 256)),
+(4, 'Prog-1',   SHA2('red123', 256)),
+(5, 'Prog-2',   SHA2('red789', 256));
 
 ---------------------
 -- Tablas APIs

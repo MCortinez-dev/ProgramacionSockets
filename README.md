@@ -131,4 +131,13 @@ Para probar la consulta y almacenamiento de repositorios y seguidores:
 | psf | `/repos psf` |
 | django | `/repos django` |
 | pallets | `/repos pallets` |
+
+### 👽 Usuarios Existentes en la tabla para usar en pruebas
+
+| Usuario | Clave |
 |---|---|
+| admin | admin123 |
+| Redes-1 | prog456 |
+| Redes-2 | prog789 |
+| Prog-1 | red123 |
+| Prog-2 | red789 |

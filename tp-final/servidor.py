@@ -14,6 +14,9 @@ import requests
 # MOdulo de tiempo
 import time
 
+# Para tener las contraseñas encriptadas
+import hashlib
+
 #-----------------------------------------------------------------------------------------------------
 # Cargo variables entorno
 load_dotenv()
@@ -77,9 +80,12 @@ def manejar_cliente(conn, addr, lista_clientes):
             # Si hay una base de datos levantada, entoces hago la consulta para comparar
             if db_up:
                 consulta = db_up.cursor()
+
+                # Hasheamos la clave que tipeó el usuario con SHA-256 para compararla con la de la BD
+                clave_hasheada = hashlib.sha256(usuario_clave.encode('utf-8')).hexdigest()                
                 
                 # Limpio el código sacando el try
-                consulta.execute("SELECT * FROM usuarios WHERE nombre = %s AND clave_encrip = %s", (usuario_cliente, usuario_clave))
+                consulta.execute("SELECT * FROM usuarios WHERE nombre = %s AND clave_encrip = %s", (usuario_cliente, clave_hasheada))
                 consulta_respuesta = consulta.fetchone()  # Verifico si pudo realizar la consulta
                 
                 # Si se ejecuto la consulta significa que habia un usuario y contraseña iguales en la Base de Datos
@@ -243,7 +249,7 @@ def github(comando, conn, db_up, usuario_seleccionado):
                     # Ejecuto consulta pasandoles los valores que estaban con signo de intrrrogacion
                     cursor.execute(insertar_repositorio, (owner, name, html_url, stargazers, created_at, updated_at))
                     db_up.commit() # saves the changes to the database transaction.
-                    confirmacion_guardado += f"😼-{name}\n 📎-{html_url}\n 💫-Stars:{stargazers} 🆙-Actualizado: {updated_at}\n{'-'*50}\n"
+                    confirmacion_guardado += f"😼-{name}\n   📎-{html_url}\n   💫-Stars:{stargazers}\n   🆙-Actualizado: {updated_at}\n{'-'*50}\n"
                 
                 #conn.send(f"El repositorio '{usuario_seleccionado}' y sus datos se guardaron en la base de datos.\n".encode('utf-8'))
                 conn.send(confirmacion_guardado.encode('utf-8'))
@@ -282,7 +288,7 @@ def github(comando, conn, db_up, usuario_seleccionado):
                     cursor.execute(insertar_follower, (owner, f_name, f_html_url, type))
                     db_up.commit() # saves the changes to the database transaction.
                     
-                    f_guardado += f"😼-{f_name}\n 📎-{f_html_url}\n{'-'*50}\n"
+                    f_guardado += f"😼-{f_name}\n   📎-{f_html_url}\n{'-'*50}\n"
                 
                 #conn.send(f"El repositorio '{usuario_seleccionado}' y sus datos se guardaron en la base de datos.\n".encode('utf-8'))
                 conn.send(f_guardado.encode('utf-8'))
