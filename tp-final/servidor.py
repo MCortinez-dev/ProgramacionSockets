@@ -224,7 +224,7 @@ def github(comando, conn, db_up, usuario_seleccionado):
                 repositorios = datos_url_repo.json()
 
                 # Parte de arriba intento de tabla guardada para mostrar en consola
-                confirmacion_guardado = f"\n--- REPOSITORIOS DE: {usuario_seleccionado} ---\n"
+                confirmacion_guardado = f"\n{'~'*50}\n--- REPOSITORIOS DE: {usuario_seleccionado} ---\n"
 
                 # Recorrer cada repositorio, tomar datos e insertarlos en la base de datos
                 for repo in repositorios:
@@ -243,7 +243,7 @@ def github(comando, conn, db_up, usuario_seleccionado):
                     # Ejecuto consulta pasandoles los valores que estaban con signo de intrrrogacion
                     cursor.execute(insertar_repositorio, (owner, name, html_url, stargazers, created_at, updated_at))
                     db_up.commit() # saves the changes to the database transaction.
-                    confirmacion_guardado += f"|| {name}\n | {html_url}\n > Stars:{stargazers} > Actualizado: {updated_at}\n \n"
+                    confirmacion_guardado += f"😼-{name}\n 📎-{html_url}\n 💫-Stars:{stargazers} 🆙-Actualizado: {updated_at}\n{'-'*50}\n"
                 
                 #conn.send(f"El repositorio '{usuario_seleccionado}' y sus datos se guardaron en la base de datos.\n".encode('utf-8'))
                 conn.send(confirmacion_guardado.encode('utf-8'))
@@ -263,7 +263,7 @@ def github(comando, conn, db_up, usuario_seleccionado):
                 followers = datos_url_followers.json()
 
                 #Muestreo de followers
-                f_guardado = f"\n-- Seguidores de: {usuario_seleccionado} --\n"
+                f_guardado = f"\n{'~'*50}\n-- Seguidores de: {usuario_seleccionado} --\n"
 
                 # Recorrer cada repositorio, tomar datos e insertarlos en la base de datos
                 for f in followers:
@@ -282,7 +282,7 @@ def github(comando, conn, db_up, usuario_seleccionado):
                     cursor.execute(insertar_follower, (owner, f_name, f_html_url, type))
                     db_up.commit() # saves the changes to the database transaction.
                     
-                    f_guardado += f"|| {f_name}\n | {f_html_url}\n \n"
+                    f_guardado += f"😼-{f_name}\n 📎-{f_html_url}\n{'-'*50}\n"
                 
                 #conn.send(f"El repositorio '{usuario_seleccionado}' y sus datos se guardaron en la base de datos.\n".encode('utf-8'))
                 conn.send(f_guardado.encode('utf-8'))

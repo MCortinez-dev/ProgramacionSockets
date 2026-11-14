@@ -116,3 +116,19 @@ Una vez autenticado con éxito en el servidor, puedes utilizar los siguientes co
 * `/followers [usuario_github]`: Consulta los seguidores de un usuario en la API de GitHub y los guarda de forma persistente en la tabla `followers`.
 * `/adios`: Finaliza la sesión de manera ordenada, cerrando el socket, notificando al servidor y liberando los recursos activos.
 * *Texto libre:* Envía un mensaje general de chat con marcas de tiempo y formato de colores ANSI.
+
+### 😼 Usuarios de prueba para comandos GitHub
+
+Para probar la consulta y almacenamiento de repositorios y seguidores:
+
+| Usuario | Comando |
+|---|---|
+| octocat | `/repos octocat` |
+| torvalds | `/repos torvalds` |
+| python | `/repos python` |
+| microsoft | `/repos microsoft` |
+| freeCodeCamp | `/repos freeCodeCamp` |
+| psf | `/repos psf` |
+| django | `/repos django` |
+| pallets | `/repos pallets` |
+|---|---|
