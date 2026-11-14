@@ -16,8 +16,28 @@ def escuchar_servidor(s_cliente):
             mensaje = s_cliente.recv(1024).decode('utf-8')
             if not mensaje:
                 break
-            print(f"\n{mensaje}")
+
+            # Identifico el tipo de respuesta para mantener los formatos
+            if "La hora actual" in mensaje:
+                print(f"\n{mensaje}\n")
+
+            elif "clientes activos conectados" in mensaje:
+                print(f"\n{mensaje}\n")
+
+            elif "REPOSITORIOS DE:" in mensaje:
+                print(f"\n{mensaje}\n")
+
+            elif "Seguidores de:" in mensaje:
+                print(f"\n{mensaje}\n")
+
+            elif "Adiós" in mensaje:
+                print(f"\n{VERDE}{mensaje}{RESET}\n")
+
+            else:
+                print(f"\n{mensaje}")
+            
             print("> ", end="", flush=True) # Restaura el prompt visual de la terminal, evita atascos
+        
         except:
             break
 
@@ -33,13 +53,13 @@ def funcion_cliente():
         # Valido al usuario - lado cliente
         valido_usuario = s.recv(1024).decode('utf-8')
         print(valido_usuario) # Recivo la pregunta
-        usuario_tipeado = input("> ")
+        usuario_tipeado = input()
         s.send(usuario_tipeado.encode('utf-8')) # Contesto
 
         # Valido la clave - lado cliente
         valido_clave = s.recv(1024).decode('utf-8')
         print(valido_clave) # Recivo la pregunta
-        clave_tipeada = input("> ")
+        clave_tipeada = input()
         s.send(clave_tipeada.encode('utf-8')) # Contesto
 
         #Respuesta del servidor sobre las credenciales
@@ -55,33 +75,29 @@ def funcion_cliente():
         hilo_escucha.start()
 
         # Charla con servidor
-        while True:
-        
+        while True:       
             hora_actual = time.strftime("%H:%M:%S") # Guardo la hora en un formato que me sirva para mosstrar diferentes mensajes
+            
             cosas_tipeadas = input("> ")
-
             # Al aumentar los comandos guardo lo tipeado en una variable limpia
             cmd_ingresado = cosas_tipeadas.strip().lower()
+
+            if not cmd_ingresado: # Evita cuelgues detectados en test completo del sistema
+                continue            
             
             # Para salir
             if cmd_ingresado == "/adios":
                 s.send(cosas_tipeadas.encode('utf-8'))
-                despedida = s.recv(1024).decode('utf-8')
-                print(f"{VERDE}{despedida}{RESET}")
                 break
 
             # Para recibir lista usuarios conectados
             if cmd_ingresado == "/usuarios":
                 s.send(cosas_tipeadas.encode('utf-8'))
-                lista_conectados = s.recv(1024).decode('utf-8')
-                print(f"\n{lista_conectados}\n")
                 continue
 
             # Para recibir la hora
             if cmd_ingresado == "/hora":
                 s.send(cosas_tipeadas.encode('utf-8'))
-                hora_recibida = s.recv(1024).decode('utf-8')
-                print(f"\n{hora_recibida}\n")
                 continue
 
             # Para enviar mensajes a todos los conectados
@@ -95,21 +111,11 @@ def funcion_cliente():
              # Para trabajar con la API
             if cmd_ingresado.startswith("/repos") or cmd_ingresado.startswith("/followers"):
                 s.send(cosas_tipeadas.encode('utf-8'))
-
-                # Muestra la respuesta que deberia variar segun el comando ingresado
-                respuesta_servidor = s.recv(1024).decode('utf-8')
-                print(f"\n{respuesta_servidor}\n")
-                
                 continue
             
             # Mensaje general - es posible que me genere errores (evaluar limpiar)
             msg = f"{CIAN}[{hora_actual}] Mensaje general =>>> {RESET}{SUPERMAGENTA}{cosas_tipeadas}{RESET}\n"
             s.send(msg.encode('utf-8'))             
-
-            # Recibo respuesta servidor
-            recibido = s.recv(1024).decode('utf-8')
-            print(recibido)
-
 
     except ConnectionRefusedError:
         print(f"{ROJO}[ERROR] No se pudo conectar al servidor (conexión rechazada).{RESET}")

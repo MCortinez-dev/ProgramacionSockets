@@ -65,12 +65,12 @@ def manejar_cliente(conn, addr, lista_clientes):
         try:
             # Le pregunto el usuario y contraseña
             conn.send("Hola ¿Cual es tu nombre de usuario?".encode('utf-8'))
-            usuario_cliente = conn.recv(1024).decode('utf-8')
+            usuario_cliente = conn.recv(1024).decode('utf-8').strip()
             if not usuario_cliente:
                 break
 
             conn.send("Ahora decime ¿Cual es tu contraseña?".encode('utf-8'))
-            usuario_clave = conn.recv(1024).decode('utf-8')
+            usuario_clave = conn.recv(1024).decode('utf-8').strip()
             if not usuario_clave:
                 break
 
@@ -139,6 +139,8 @@ def manejar_cliente(conn, addr, lista_clientes):
                                 conn.send("¡Adiós! Cerrando conexión...".encode('utf-8'))
                             except:
                                 pass # Intento evitar error ConnectionAbortedError: [WinError 10038] - no sirvió
+                            
+                            conectado = False # salgo de los dos while
                             break
 
                         if cmd == "/usuarios":
@@ -151,6 +153,11 @@ def manejar_cliente(conn, addr, lista_clientes):
                             respuesta = f"{VERDE}[SERVIDOR] La hora actual del servidor es {hora_actual}.{RESET}"
                             conn.send(respuesta.encode('utf-8'))
                             continue
+
+                        # Si llega un mensaje de chat general (que no empieza con barra /)
+                        respuesta_eco = f"{VERDE}[SERVIDOR ECO]: {mensaje}{RESET}"
+                        conn.send(respuesta_eco.encode('utf-8'))
+                        continue
 
                 else:
                     print(f"{ROJO}[AUTENTICACIÓN FALLIDA] Credenciales incorrectas para '{usuario_cliente}'.{RESET}")
