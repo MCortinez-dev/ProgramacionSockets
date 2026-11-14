@@ -33,8 +33,6 @@ Mas abajo se detalla una explicación general y el funcionamiento del 1er ejerci
         requirements.txt -------------------------# Para pip install
         servidor.py
         Notas.md ---------------------------------# Información leida o recopilada durante el desarrollo
-        
-
 ``` 
 ---
 
