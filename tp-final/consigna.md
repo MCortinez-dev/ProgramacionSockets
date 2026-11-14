@@ -1,6 +1,6 @@
-## 🌐 Tp Integrador - Programación sobre redes
+# 🌐 Tp Integrador - Programación sobre redes
 
-# 📒 Consigna
+## 📒 Consigna
 - [x] 1)​ Realizar un programa de sockets Cliente Servidor concurrente donde el cliente al conectarse debe enviar su nombre de usuario y contraseña.
 - [x] 2)​ Este nombre de usuario y contraseña deben validarse en una base de datos. 
 - [ ] 2.1) Extra mio: Intentar usar bcript 
@@ -15,7 +15,7 @@
     - [x] e)​ /usuarios El servidor debe devolver la lista de todos los usuarios conectados
     - [x] f)​ /adios Se envía un mensaje de despedida y se desconecta.
 
-# 📚 Documentación
+## 📚 Documentación
 
 - [x] El código se debe subir a un repositorio de git al cual se me debe enviar la invitación : Github: javierblancoedu
 - [ ] En el readme.md del repositorio se debe documentar el contenido y se debe documentar cómo se usa.
