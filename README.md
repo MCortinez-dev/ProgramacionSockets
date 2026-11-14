@@ -15,30 +15,20 @@ Proyecto desarrollado para Programación sobre Redes utilizando Sockets TCP (`AF
 |   
 +---cliente-servidor-1er-ejercicio
 |       (cliente.py) + (clienteXboot.py) # Cliente manejado, mas simulados
-|       Notas.md # Información leida o recopilada durante el desarrollo
-|       lanzador_automatico_linux.sh
-|       lanzador_automatico_windows.bat
-|       servidor.py
+|       Info.md # Información leida o recopilada durante el desarrollo
+|       lanzador_automatico_linux.sh # Lanzador automatico para probar en linux abre varias ventanas
+|       lanzador_automatico_windows.bat # Lanzador automatico para probar en linux abre varias ventanas
+|       servidor.py # Servidor
 |       
-+---teoria_theading_sockets
-|   |   explicacion_threading.py
-|   |   Flujo TCP con Sockets en Python.png
-|   |   Guía visual de `join()` en Python.png
-|   |   serverecothreding.py
-|   |   sockets-tcp-flow.webp
-|   |   threading.py
-|   |   
-|   \---ejemplo-cliente-servidor
-|           cliente.py
-|           server.py
++---teoria_theading_sockets # Archivos e imagenes de apoyo teórico práctico
 |           
 +---tp-final
-|       base-datos.sql
+|       base-datos.sql # Comandos para crear tablas necesarias e información interesante
 |       cliente.py
-|       consigna.md
-|       requirements.txt
+|       consigna.md # Consigna a cumplir por el TP
+|       requirements.txt # Para pip install
 |       servidor.py
-|       temp.md
+|       Notas.md # Información leida o recopilada durante el desarrollo
 |       
 \---__pycache__
         threading.cpython-314.pyc
