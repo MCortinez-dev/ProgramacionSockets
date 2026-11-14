@@ -1,40 +1,37 @@
- class socket.socket(family=AF_INET, type=SOCK_STREAM, proto=0, fileno=None) # creo el socket  ipv4(AF_INET) y tcp(SOCK_STREAM)
-
-    Create a new socket using the given address family, socket type and protocol number. The address family should be AF_INET (the default), 
-    AF_INET6, AF_UNIX, AF_CAN, AF_PACKET, or AF_RDS. The socket type should be SOCK_STREAM (the default), SOCK_DGRAM, SOCK_RAW or perhaps one of the other SOCK_ constants. 
-    The protocol number is usually zero and may be omitted or in the case where the address family is AF_CAN the protocol should be one of CAN_RAW, CAN_BCM, CAN_ISOTP or CAN_J1939.
-
-    If fileno is specified, the values for family, type, and proto are auto-detected from the specified file descriptor. Auto-detection can be overruled by calling the function with 
-    explicit family, type, or proto arguments. This only affects how Python represents e.g. the return value of socket.getpeername() but not the actual OS resource. Unlike socket.fromfd(), 
-    fileno will return the same socket and not a duplicate. This may help close a detached socket using close().
-
-    The newly created socket is non-inheritable.
-
-------------------------------------------------
- socket.create_connection(address, timeout=GLOBAL_DEFAULT, source_address=None, *, all_errors=False)
-
-    Connect to a TCP service listening on the internet address (a 2-tuple (host, port)), and return the socket object. This is a higher-level 
-    function than socket.connect(): if host is a non-numeric hostname, it will try to resolve it for both AF_INET and AF_INET6, and then try to connect to all
-    possible addresses in turn until a connection succeeds. This makes it easy to write clients that are compatible to both IPv4 and IPv6.
-    Passing the optional timeout parameter will set the timeout on the socket instance before attempting to connect. If no timeout is supplied, the global default 
-    timeout setting returned by getdefaulttimeout() is used.
-    If supplied, source_address must be a 2-tuple (host, port) for the socket to bind to as its source address before connecting. If host or port are ‘’ or 0 
-    respectively the OS default behavior will be used.
-    When a connection cannot be created, an exception is raised. By default, it is the exception from the last address in the list. If all_errors is True, it is
-     an ExceptionGroup containing the errors of all attempts.
-
-----------------------------------------------------------------------------------------------------------------------
+# socket.socket
+```bash
+class socket.socket(family=AF_INET, type=SOCK_STREAM, proto=0, fileno=None) # creo el socket  ipv4(AF_INET) y tcp(SOCK_STREAM)
+```
+- Create a new socket using the given address family, socket type and protocol number. The address family should be AF_INET (the default), AF_INET6, AF_UNIX, AF_CAN, AF_PACKET, or AF_RDS. 
+- The socket type should be SOCK_STREAM (the default), SOCK_DGRAM, SOCK_RAW or perhaps one of the other SOCK_ constants. 
+- The protocol number is usually zero and may be omitted or in the case where the address family is AF_CAN the protocol should be one of CAN_RAW, CAN_BCM, CAN_ISOTP or CAN_J1939.
+- If fileno is specified, the values for family, type, and proto are auto-detected from the specified file descriptor. 
+- Auto-detection can be overruled by calling the function with explicit family, type, or proto arguments. This only affects how Python represents e.g. the return value of socket.getpeername() but not the actual OS resource. Unlike socket.fromfd(), fileno will return the same socket and not a duplicate. This may help close a detached socket using close().
+- The newly created socket is non-inheritable.
+---
+# socket.create_connection
+```bash
+socket.create_connection(address, timeout=GLOBAL_DEFAULT, source_address=None, *, all_errors=False)
+```
+- Connect to a TCP service listening on the internet address (a 2-tuple (host, port)), and return the socket object. This is a higher-level function than socket.connect(): if host is a  non-numeric hostname, it will try to resolve it for both AF_INET and AF_INET6, and then try to connect to all possible addresses in turn until a connection succeeds. This makes it easy to write clients that are compatible to both IPv4 and IPv6.
+- Passing the optional timeout parameter will set the timeout on the socket instance before attempting to connect. If no timeout is supplied, the global default timeout setting returned by getdefaulttimeout() is used.
+- If supplied, source_address must be a 2-tuple (host, port) for the socket to bind to as its source address before connecting. If host or port are ‘’ or 0 respectively the OS default behavior will be used.
+- When a connection cannot be created, an exception is raised. By default, it is the exception from the last address in the list. If all_errors is True, it is an ExceptionGroup containing the errors of all attempts.
+---
+# setsockopt
+```bash
 setsockopt(level, optname, value: int | Buffer)
 setsockopt(level, optname, None, optlen: int)
-
-    Set the value of the given socket option (see the Unix manual page setsockopt(2)). The needed symbolic constants are defined in this module 
-    (SO_* etc. <socket-unix-constants>). The value can be an integer, None or a bytes-like object representing a buffer. In the latter case it is up 
-    to the caller to ensure that the bytestring contains the proper bits (see the optional built-in module struct for a way to encode C 
-    structures as bytestrings). When value is set to None, optlen argument is required. It’s equivalent to calling setsockopt() C function with 
-    optval=NULL and optlen=optlen.
-
--------------------------------------------------------------------------------------------------------------------------
+```
+- Set the value of the given socket option (see the Unix manual page setsockopt(2)). The needed symbolic constants are defined in this module (SO_* etc. <socket-unix-constants>).
+- The value can be an integer, None or a bytes-like object representing a buffer.
+- In the latter case it is up to the caller to ensure that the bytestring contains the proper bits (see the optional built-in module struct for a way to encode C structures as bytestrings).
+- When value is set to None, optlen argument is required. It’s equivalent to calling setsockopt() C function with optval=NULL and optlen=optlen.
+---
+# servidor.setsockopt
+```bash
 servidor.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+```
 
 0.  socket.SOL_SOCKET (El Nivel): Le indica al sistema operativo que la configuración que vamos a cambiar pertenece a la capa de sockets en 
     general (Socket Layer), y no a un protocolo específico como TCP (IPPROTO_TCP).
@@ -64,9 +61,7 @@ servidor.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 # Bibliofrafia
 # https://docs.python.org/3/library/socket.html
 # https://docs.python.org/3/library/socketserver.html#module-socketserver
- 
 # https://docs.python.org/3/library/threading.html
-
 # https://elpythonista.com/f-strings-python
 # https://ierwinx.com/python/terminal/colores-y-estilos.html
 

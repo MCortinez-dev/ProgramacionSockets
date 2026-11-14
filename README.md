@@ -8,6 +8,41 @@ Proyecto desarrollado para Programación sobre Redes utilizando Sockets TCP (`AF
 
 ## 📂 Estructura del Proyecto
 
+```
+|   .env
+|   .gitignore
+|   README.md
+|   
++---cliente-servidor-1er-ejercicio
+|       (cliente.py) + (clienteXboot.py) # Cliente manejado, mas simulados
+|       Notas.md # Información leida o recopilada durante el desarrollo
+|       lanzador_automatico_linux.sh
+|       lanzador_automatico_windows.bat
+|       servidor.py
+|       
++---teoria_theading_sockets
+|   |   explicacion_threading.py
+|   |   Flujo TCP con Sockets en Python.png
+|   |   Guía visual de `join()` en Python.png
+|   |   serverecothreding.py
+|   |   sockets-tcp-flow.webp
+|   |   threading.py
+|   |   
+|   \---ejemplo-cliente-servidor
+|           cliente.py
+|           server.py
+|           
++---tp-final
+|       base-datos.sql
+|       cliente.py
+|       consigna.md
+|       requirements.txt
+|       servidor.py
+|       temp.md
+|       
+\---__pycache__
+        threading.cpython-314.pyc
+```
 * **`servidor.py`**: Servidor central multihilo que gestiona conexiones simultáneas, el control de la lista de clientes activos y el procesamiento de comandos.
 * **`cliente.py`**: Cliente interactivo por teclado con estilos ANSI personalizados y soporte para comandos especiales.
 * **`cliente1boot.py` al `cliente9boot.py`**: Scripts de bots automatizados para pruebas de estrés y concurrencia en paralelo.
