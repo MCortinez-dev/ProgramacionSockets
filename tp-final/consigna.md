@@ -1,4 +1,8 @@
 # 🌐 Tp Integrador - Programación sobre redes
+
+- Materia: Programación sobre redes
+- Profesor: Javier Blanco [Git-HUb](https://github.com/javierblancoedu)
+- Institución: IFTS N°4 [Web](https://ifts4.edu.ar/index.php)
 ---
 ## 📒 Consigna
 
