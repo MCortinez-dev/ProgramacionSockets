@@ -3,8 +3,8 @@ Markdown
 
 El presente Proyecto desarrollado la teoría y práctica para la Programación sobre Redes utilizando Sockets TCP (`AF_INET`, `SOCK_STREAM`) y concurrencia con hilos (`threading`) en Python. El mismo contine tres carpetas pricipales:
 - cliente-servidor-1er-ejercicio <-- Primer ejecicio centrado en la comprensión de threading
-- teoria_theading_sockets <-- Bases teórica de las clases
-- tp-final <-- Trabajo práctico final presentado en la matería
+- teoria_theading_sockets <--------- Bases teórica de las clases
+- tp-final <------------------------ Trabajo práctico final presentado en la matería
 
 Mas abajo se detalla una explicación general y el funcionamiento del 1er ejercicio y del TP Final.
 
@@ -12,16 +12,16 @@ Mas abajo se detalla una explicación general y el funcionamiento del 1er ejerci
 ## 📂 Estructura del Proyecto
 ```
 /
-|   .env
-|   .gitignore
-|   README.md
+|   .env -----------------------------------------# Variables personales de entorno - Siempre poner en gitignore
+|   .gitignore -----------------------------------# Indica a GIT que no archivos NO sincronizar con el repositorio
+|   README.md ------------------------------------# Explicación del proyecto
 |   
 +---cliente-servidor-1er-ejercicio
 |       (cliente.py) + (clienteXboot.py) ---------# Cliente manejado, mas simulados
 |       Info.md ----------------------------------# Información leida o recopilada durante el desarrollo
 |       lanzador_automatico_linux.sh -------------# Lanzador automatico para probar en linux abre varias ventanas
 |       lanzador_automatico_windows.bat ----------# Lanzador automatico para probar en linux abre varias ventanas
-|       servidor.py # Servidor
+|       servidor.py ------------------------------# Servidor
 |       
 +---teoria_theading_sockets ----------------------# Archivos e imagenes de apoyo teórico práctico
 |           
@@ -33,6 +33,7 @@ Mas abajo se detalla una explicación general y el funcionamiento del 1er ejerci
         servidor.py
         Notas.md ---------------------------------# Información leida o recopilada durante el desarrollo
 ``` 
+---
 ---
 
 ## 🚀 Cómo Ejecutar ▶️ cliente-servidor-1er-ejercicio
@@ -59,6 +60,7 @@ Para simular el entorno completo con el servidor, el cliente interactivo y múlt
 * /users: Consulta al servidor la cantidad y estado de los usuarios conectados en tiempo real.
 * /adios: Cierra la sesión de manera ordenada, eliminando el socket de la lista de conexiones activas.
 
+---
 ---
 
 ## 🚀 Cómo Ejecutar ▶️ tp-final

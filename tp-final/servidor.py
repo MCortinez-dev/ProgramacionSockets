@@ -25,7 +25,9 @@ load_dotenv()
 # Configuración de colores para la consola del servidor
 VERDE = "\033[32m"
 ROJO = "\033[31m"
+YELLOW = "\033[93m"
 RESET = "\033[0m"
+AZUL_SUBRAYADO = "\033[4;34m"
 
 #-----------------------------------------------------------------------------------------------------
 # Para permitir comunicación SERVIDOR/CLIENTE
@@ -101,7 +103,7 @@ def manejar_cliente(conn, addr, lista_clientes):
                     usuarios_conectados[conn] = usuario_cliente  
 
                     # Recibe el mensaje luego de validar y se queda charlando
-                    conn.send("¡Ya podemos charlas! Bienvenido\n".encode('utf-8'))
+                    conn.send("¡Ya podemos charlar! Bienvenido\n".encode('utf-8'))
                     
                     # Manejo de comandos
                     while conectado:
@@ -121,11 +123,11 @@ def manejar_cliente(conn, addr, lista_clientes):
                             # Si tiene algo escrito para todos lo agarro, guardo y envío
                             if len(partes) > 1:
                                 mensaje_a_todos = partes[1]
-                                texto_a_enviar = f"\n[MENSAJE GLOBAL de {usuario_cliente}]: {mensaje_a_todos}\n"
+                                texto_a_enviar = f"\n{AZUL_SUBRAYADO}[MENSAJE GLOBAL de {usuario_cliente}]: {mensaje_a_todos}{RESET}\n"
                             else:
-                                texto_a_enviar = f"\n[MENSAJE GLOBAL de {usuario_cliente}]: (vacío)\n" # Si mandó solo algo vacio
+                                texto_a_enviar = f"\n{AZUL_SUBRAYADO}[MENSAJE GLOBAL de {usuario_cliente}]: (vacío){RESET}\n" # Si mandó solo algo vacio
                             
-                            # PRobar poninedo clientes boots si los recorre y les envia el mensaje
+                            # Recorre lista de clientes y envia el mensaje
                             for cliente_socket in lista_clientes.copy():
                                 try:
                                     cliente_socket.sendall(texto_a_enviar.encode('utf-8'))
@@ -163,7 +165,7 @@ def manejar_cliente(conn, addr, lista_clientes):
                             # Cuento cuántos están conectados ahora
                             cantidad = len(usuarios_conectados)
 
-                            # Uno los nombres de los usuarios en un string separado por comas
+                            # Uno los nombres de los usuarios en un string separado por comas / values contiene nombre / key contiene sockets / distingue conexiones unicas por mas que se repitan nombres
                             nombres = ", ".join(usuarios_conectados.values())
 
                             respuesta = f"\n[SERVIDOR] CLIENTES CONECTADOS ({cantidad}):\n"
@@ -202,18 +204,21 @@ def manejar_cliente(conn, addr, lista_clientes):
             print(f"{ROJO}[ERROR EN CLIENTE] {e}{RESET}")
             break
 
-        # Al terminar la conexión
+        # 1. Elimino el usuario del diccionario de usuarios conectados
         if conn in usuarios_conectados:
             usuarios_conectados.pop(conn)
 
+        # 2. Cierro la conexión del socket
         try:
             conn.close()
         except:
             pass
 
+        # 3. Elimino el socket de la lista de clientes activos
         if conn in lista_clientes:
             lista_clientes.remove(conn)
 
+        # 4. Informo la desconexión en la consola del servidor
         print(f"\n{VERDE}[DESCONEXIÓN] {addr} se ha ido. Clientes activos: {len(lista_clientes)}{RESET}")
 #----------------------------------------------------------------------------------------------------------------------------
 # Funcion utiliza request para manejar comandos de API, almacena los resultados en MySQL.
@@ -339,14 +344,14 @@ def chat_servidor():
 
     while True:
 
-        mensaje = input("\nSERVIDOR > ").strip()
+        mensaje = input(f"\n{YELLOW}SERVIDOR > {RESET}").strip()
 
         if not mensaje:
             continue
 
         partes = mensaje.split(maxsplit=2)
 
-        # Verifico que el comando tenga sus tres partes
+        # Verifico que el comando tenga sus tres partes y si escribrio algun comando mal le muesto una mini guia
         if len(partes) < 3 or partes[0].lower() != "/chat":
             print("Uso: /chat usuario mensaje")
             print("Para todos: /chat todos mensaje")
@@ -361,17 +366,17 @@ def chat_servidor():
             for cliente_socket in list(usuarios_conectados.keys()):
                 try:
                     cliente_socket.sendall(
-                        f"\n[SERVIDOR]: {texto}\n".encode('utf-8')
+                        f"\n{YELLOW}[SERVIDOR]: {texto}{RESET}\n".encode('utf-8')
                     )
                 except:
                     pass
 
-            print("[SERVIDOR] Mensaje enviado a todos los clientes.")
+            print(f"{YELLOW}[SERVIDOR] Mensaje enviado a todos los clientes.{RESET}")
 
-        # Enviar mensaje a un usuario específico
+        # Enviar mensaje a un usuario específico (si hay dos usuarios con el mismo nombre falta individualizar por conexion)
         else:
 
-            encontrado = False
+            encontrado = False # Defino variable para saber si lo encontre al usuario
 
             for cliente_socket, nombre in list(usuarios_conectados.items()):
 
@@ -379,17 +384,17 @@ def chat_servidor():
 
                     try:
                         cliente_socket.sendall(
-                            f"\n[SERVIDOR PRIVADO]: {texto}\n".encode('utf-8')
+                            f"\n{YELLOW}[SERVIDOR PRIVADO]: {texto}{RESET}\n".encode('utf-8')
                         )
                         encontrado = True
 
                     except:
                         pass
 
-            if encontrado:
-                print(f"[SERVIDOR] Mensaje enviado a {destinatario}.")
+            if encontrado: # si lo encontre la variable va a estar en True
+                print(f"{YELLOW}[SERVIDOR] Mensaje enviado a {destinatario}.{RESET}")
             else:
-                print(f"[ERROR] El usuario '{destinatario}' no está conectado.")
+                print(f"{ROJO}[ERROR] El usuario '{destinatario}' no está conectado.{RESET}")
 
 
 #----------------------------------------------------------------------------------------------------------------------------

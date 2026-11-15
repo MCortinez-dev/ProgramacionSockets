@@ -7,6 +7,7 @@ SUPERMAGENTA = "\033[1;4;95m"  # Negrita, subrayado, magenta brillante
 VERDE = "\033[32m"             # Verde estándar
 CIAN = "\033[36m"              # Cían
 ROJO = "\033[31m"              # Rojo para errores
+AZUL_SUBRAYADO = "\033[4;34m"  # Azul subrayado
 RESET = "\033[0m"              # Reset de formato
 
 def escuchar_servidor(s_cliente):
