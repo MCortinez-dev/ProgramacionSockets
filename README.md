@@ -80,57 +80,57 @@ El Trabajo Práctico Final integra un servidor TCP concurrente basado en hilos (
      ```
 
 3. **Variables de Entorno (`.env`):**
-- Crea un archivo llamado `.env` en la raíz del proyecto configurando las credenciales de acceso a tu base de datos y tu token personal de GitHub (indispensable para evitar el bloqueo por límite de peticiones de la API - Error 403):
-   ```env
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_USER=root
-   DB_PASSWORD=tu_contraseña
-   DB_NAME=base-datos
-   GITHUB_TOKEN=tu_token_personal_de_github
-   ```
+   - Crea un archivo llamado `.env` en la raíz del proyecto configurando las credenciales de acceso a tu base de datos y tu token personal de GitHub (indispensable para evitar el bloqueo por límite de peticiones de la API - Error 403):
+      ```env
+      DB_HOST=localhost
+      DB_PORT=3306
+      DB_USER=root
+      DB_PASSWORD=tu_contraseña
+      DB_NAME=base-datos
+      GITHUB_TOKEN=tu_token_personal_de_github
+      ```
 
 ### 🕹️ Instrucciones de Ejecución
 
 1. **Iniciar el Servidor:**
-Abre una terminal, posicionate en la carpeta `tp-final` y ejecuta:
-   ```bash
-   python servidor.py
-   ```
+   Abre una terminal, posicionate en la carpeta `tp-final` y ejecuta:
+      ```bash
+      python servidor.py
+      ```
 
 2. **Iniciar el Cliente:**
-Abre otra terminal (puedes abrir múltiples instancias para probar la concurrencia entre varios clientes), posicionate en la carpeta `tp-final` y ejecuta:
-   ```bash
-   python cliente.py
-   ```
+   Abre otra terminal (puedes abrir múltiples instancias para probar la concurrencia entre varios clientes), posicionate en la carpeta `tp-final` y ejecuta:
+      ```bash
+      python cliente.py
+      ```
 
-* El sistema te solicitará por consola tus credenciales de acceso. Tenes disponible los siguientes usuarios 👽:
-   | Usuario | Clave |
-   |---|---|
-   | admin | admin123 |
-   | Redes-1 | prog456 |
-   | Redes-2 | prog789 |
-   | Prog-1 | red123 |
-   | Prog-2 | red789 |
+   * El sistema te solicitará por consola tus credenciales de acceso. Tenes disponible los siguientes usuarios 👽:
+      | Usuario | Clave |
+      |---|---|
+      | admin | admin123 |
+      | Redes-1 | prog456 |
+      | Redes-2 | prog789 |
+      | Prog-1 | red123 |
+      | Prog-2 | red789 |
 
 ### ⌨️ Comandos Disponibles en el Chat en CLIENTE & en SERVIDOR
 
 Una vez autenticado con éxito en el servidor, puedes utilizar los siguientes comandos escribiendolos en la consola:
 
-#### Lado cliente
+   #### Lado cliente
 
-   * `/usuarios`: Consulta en tiempo real la cantidad de clientes activos conectados al servidor.
-   * `/hora`: Solicita y muestra la hora actual del servidor.
-   * `/todos [mensaje]` : Envía un mensaje a todos los usuarios conectados desde el lado del cliente.
-   * `/repos [usuario_github]`: Consulta los repositorios públicos de un usuario a través de la API de GitHub, los muestra formateados en pantalla y los almacena de forma persistente en la tabla `repositorios` de la base de datos.
-   * `/followers [usuario_github]`: Consulta los seguidores de un usuario en la API de GitHub y los guarda de forma persistente en la tabla `followers`.
-   * `/adios`: Finaliza la sesión de manera ordenada, cerrando el socket, notificando al servidor y liberando los recursos activos.
-   * *Texto libre:* Envía un mensaje general de chat con marcas de tiempo y formato de colores ANSI al SERVIDOR.
+      * `/usuarios`: Consulta en tiempo real la cantidad de clientes activos conectados al servidor.
+      * `/hora`: Solicita y muestra la hora actual del servidor.
+      * `/todos [mensaje]` : Envía un mensaje a todos los usuarios conectados desde el lado del cliente.
+      * `/repos [usuario_github]`: Consulta los repositorios públicos de un usuario a través de la API de GitHub, los muestra formateados en pantalla y los almacena de forma persistente en la tabla `repositorios` de la base de datos.
+      * `/followers [usuario_github]`: Consulta los seguidores de un usuario en la API de GitHub y los guarda de forma persistente en la tabla `followers`.
+      * `/adios`: Finaliza la sesión de manera ordenada, cerrando el socket, notificando al servidor y liberando los recursos activos.
+      * *Texto libre:* Envía un mensaje general de chat con marcas de tiempo y formato de colores ANSI al SERVIDOR.
 
-#### Lado servidor
+   #### Lado servidor
 
-   * `/chat todos [mensaje]`: Envía un mensaje a todos los clientes autenticados que se encuentren conectados al servidor.
-   * `/chat [usuario] [mensaje]`: Envía un mensaje privado a todas las sesiones conectadas que correspondan al nombre de usuario indicado. Si un mismo usuario inició varias sesiones, todas recibirán el mensaje.
+      * `/chat todos [mensaje]`: Envía un mensaje a todos los clientes autenticados que se encuentren conectados al servidor.
+      * `/chat [usuario] [mensaje]`: Envía un mensaje privado a todas las sesiones conectadas que correspondan al nombre de usuario indicado. Si un mismo usuario inició varias sesiones, todas recibirán el mensaje.
 
 ### 😼 Usuarios de prueba para comandos GitHub
 
