@@ -121,7 +121,7 @@ Una vez autenticado con éxito en el servidor, puedes utilizar los siguientes co
 
    * `/usuarios`: Consulta en tiempo real la cantidad de clientes activos conectados al servidor.
    * `/hora`: Solicita y muestra la hora actual del servidor.
-   * `/todos [mensaje]` : Envía un mensaje a todos los usuarios conectados desde el lado del cliente.
+   * `/todos` : Envía un mensaje a todos los usuarios conectados desde el lado del cliente. Ingresa el comando y el programa te preguntará que quieres enviar.
    * `/repos [usuario_github]`: Consulta los repositorios públicos de un usuario a través de la API de GitHub, los muestra formateados en pantalla y los almacena de forma persistente en la tabla `repositorios` de la base de datos.
    * `/followers [usuario_github]`: Consulta los seguidores de un usuario en la API de GitHub y los guarda de forma persistente en la tabla `followers`.
    * `/adios`: Finaliza la sesión de manera ordenada, cerrando el socket, notificando al servidor y liberando los recursos activos.

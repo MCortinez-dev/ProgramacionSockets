@@ -20,25 +20,25 @@ def escuchar_servidor(s_cliente):
 
             # Identifico el tipo de respuesta para mantener los formatos
             if "La hora actual" in mensaje:
-                print(f"\n{mensaje}\n")
+                print(f"{mensaje}")
 
             elif "clientes activos conectados" in mensaje:
-                print(f"\n{mensaje}\n")
+                print(f"{mensaje}")
 
             elif "REPOSITORIOS DE:" in mensaje:
-                print(f"\n{mensaje}\n")
+                print(f"{mensaje}")
 
             elif "Seguidores de:" in mensaje:
-                print(f"\n{mensaje}\n")
+                print(f"{mensaje}")
 
             elif "Adiós" in mensaje:
-                print(f"\n{VERDE}{mensaje}{RESET}\n")
+                print(f"{VERDE}{mensaje}{RESET}")
 
             elif "CLIENTES CONECTADOS" in mensaje:
-                print(f"\n{CIAN}{mensaje}{RESET}\n")
+                print(f"{CIAN}{mensaje}{RESET}")
 
             else:
-                print(f"\n{mensaje}")
+                print(f"{mensaje}")
             
             print("> ", end="", flush=True) # Restaura el prompt visual de la terminal, evita atascos
         
@@ -118,7 +118,7 @@ def funcion_cliente():
                 continue
             
             # Mensaje general - es posible que me genere errores (evaluar limpiar)
-            msg = f"{CIAN}[{hora_actual}] Mensaje general =>>> {RESET}{SUPERMAGENTA}{cosas_tipeadas}{RESET}\n"
+            msg = f"{CIAN}[{hora_actual}] Mensaje > {RESET}{SUPERMAGENTA}{cosas_tipeadas}{RESET}"
             s.send(msg.encode('utf-8'))             
 
     except ConnectionRefusedError:

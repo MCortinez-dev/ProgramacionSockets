@@ -23,14 +23,16 @@ load_dotenv()
 
 #-----------------------------------------------------------------------------------------------------
 # Configuración de colores para la consola del servidor
+AZUL_SUBRAYADO = "\033[4;34m"
+CIAN = "\033[36m"
 VERDE = "\033[32m"
 ROJO = "\033[31m"
+ROJO_SUBRAYADO = "\033[4;31m"
 YELLOW = "\033[93m"
 RESET = "\033[0m"
-AZUL_SUBRAYADO = "\033[4;34m"
 
 #-----------------------------------------------------------------------------------------------------
-# Para permitir comunicación SERVIDOR/CLIENTE
+# Para permitir comunicación SERVIDOR/CLIENTE, guardo en diccionario (key - item - value)
 usuarios_conectados = {} 
 #-----------------------------------------------------------------------------------------------------
 # Funsion conectar DB
@@ -61,12 +63,12 @@ def manejar_cliente(conn, addr, lista_clientes):
     usuario_cliente = None
     
     # Aviso que hay una conexíon establecida
-    print(f"\n{VERDE}[NUEVA CONEXIÓN] {addr} conectado.{RESET}")
+    print(f"{VERDE}[NUEVA CONEXIÓN]{RESET}{CIAN}{addr} conectado.{RESET}")
     
     # Conecto a la base de datos
     db_up = conectar_DB()
     if db_up:
-        print(f"{VERDE}[DB OK]La base de datos existe y la encontramos a traves del puerto 3306{RESET}")
+        print(f"{VERDE}[DB OK]{RESET}{CIAN}La base de datos existe y la encontramos a traves del puerto 3306{RESET}")
     else:
         print(f"{ROJO}[DB ALERTA] Problema al conectar con la base de datos.{RESET}")
     
@@ -74,12 +76,12 @@ def manejar_cliente(conn, addr, lista_clientes):
     while conectado:
         try:
             # Le pregunto el usuario y contraseña
-            conn.send("Hola ¿Cual es tu nombre de usuario?".encode('utf-8'))
+            conn.send(f"{YELLOW}🙋 Hola, ¿cuál es tu nombre de usuario?{RESET}".encode('utf-8'))
             usuario_cliente = conn.recv(1024).decode('utf-8').strip()
             if not usuario_cliente:
                 break
 
-            conn.send("Ahora decime ¿Cual es tu contraseña?".encode('utf-8'))
+            conn.send(f"{YELLOW}🔑 Ahora decime, ¿cuál es tu contraseña?{RESET}".encode('utf-8'))
             usuario_clave = conn.recv(1024).decode('utf-8').strip()
             if not usuario_clave:
                 break
@@ -97,13 +99,13 @@ def manejar_cliente(conn, addr, lista_clientes):
                 
                 # Si se ejecuto la consulta significa que habia un usuario y contraseña iguales en la Base de Datos
                 if consulta_respuesta:
-                    print(f"{VERDE}[AUTENTICACIÓN] {usuario_cliente} validado correctamente.{RESET}")
+                    print(f"{VERDE}[AUTENTICACIÓN]{RESET}{ROJO}{usuario_cliente} {RESET}{CIAN}validado correctamente.{RESET}")
                                         
                     # Registro el usuario y su socket
                     usuarios_conectados[conn] = usuario_cliente  
 
                     # Recibe el mensaje luego de validar y se queda charlando
-                    conn.send("¡Ya podemos charlar! Bienvenido\n".encode('utf-8'))
+                    conn.send(f"{YELLOW}¡Ya podemos charlar! Bienvenido{RESET}".encode('utf-8'))
                     
                     # Manejo de comandos
                     while conectado:
@@ -111,7 +113,7 @@ def manejar_cliente(conn, addr, lista_clientes):
                         mensaje = conn.recv(1024).decode('utf-8') # Recibe hasta 1024 bytes de datos desde el socket del cliente y los decodifica de bytes a texto (string)
                         if not mensaje:
                             break
-                        print(f"[MENSAJE RECIBIDO de {usuario_cliente}]: {mensaje}") # Vuelvo a poner la linea para que se muestre lo que hace cada cliente en su propio consola
+                        print(f"{VERDE}[MENSAJE RECIBIDO de {RESET}{ROJO}{usuario_cliente}{RESET}{VERDE}]:{RESET}{mensaje}") # Vuelvo a poner la linea para que se muestre lo que hace cada cliente en su propio consola
 
                         # Como hay muchos comandos, limpio el mensaje una sola vez. Saca espacios en los extremos y pone en minúscula
                         cmd = mensaje.strip().lower()
@@ -123,9 +125,9 @@ def manejar_cliente(conn, addr, lista_clientes):
                             # Si tiene algo escrito para todos lo agarro, guardo y envío
                             if len(partes) > 1:
                                 mensaje_a_todos = partes[1]
-                                texto_a_enviar = f"\n{AZUL_SUBRAYADO}[MENSAJE GLOBAL de {usuario_cliente}]: {mensaje_a_todos}{RESET}\n"
+                                texto_a_enviar = f"📨  {AZUL_SUBRAYADO}[MENSAJE GLOBAL de {RESET}{ROJO_SUBRAYADO}{usuario_cliente}{RESET}{AZUL_SUBRAYADO}]:{RESET}{YELLOW}{mensaje_a_todos}{RESET}"
                             else:
-                                texto_a_enviar = f"\n{AZUL_SUBRAYADO}[MENSAJE GLOBAL de {usuario_cliente}]: (vacío){RESET}\n" # Si mandó solo algo vacio
+                                texto_a_enviar = f"📨  {AZUL_SUBRAYADO}[MENSAJE GLOBAL de {RESET}{ROJO_SUBRAYADO}{usuario_cliente}{RESET}{AZUL_SUBRAYADO}]:{RESET}{YELLOW}(vacío){RESET}" # Si mandó solo algo vacio
                             
                             # Recorre lista de clientes y envia el mensaje
                             for cliente_socket in lista_clientes.copy():
@@ -152,7 +154,7 @@ def manejar_cliente(conn, addr, lista_clientes):
 
                         # Intento evitar error ConnectionAbortedError: [WinError 10053]
                         if cmd == "/adios":
-                            print(f"{VERDE}[DESCONEXIÓN SOLICITADA] {addr} ({usuario_cliente}){RESET}")
+                            print(f"{VERDE}[DESCONEXIÓN SOLICITADA]{RESET}{CIAN} {addr} ({RESET}{ROJO}{usuario_cliente}{RESET}{VERDE}){RESET}")
                             try:
                                 conn.send("¡Adiós! Cerrando conexión...".encode('utf-8'))
                             except:
@@ -166,9 +168,9 @@ def manejar_cliente(conn, addr, lista_clientes):
                             cantidad = len(usuarios_conectados)
 
                             # Uno los nombres de los usuarios en un string separado por comas / values contiene nombre / key contiene sockets / distingue conexiones unicas por mas que se repitan nombres
-                            nombres = ", ".join(usuarios_conectados.values())
+                            nombres = ", ".join([f"👽 {nombre}" for nombre in usuarios_conectados.values()])
 
-                            respuesta = f"\n[SERVIDOR] CLIENTES CONECTADOS ({cantidad}):\n"
+                            respuesta = f"{ROJO}[SERVIDOR] CLIENTES CONECTADOS {RESET}{CIAN} ({cantidad}) >> {RESET}"
 
                             # Si hay alguno conectado los muestro, sino aviso que está vacío
                             if cantidad > 0:
@@ -182,22 +184,22 @@ def manejar_cliente(conn, addr, lista_clientes):
 
                         if cmd == "/hora":
                             hora_actual = time.strftime("%H:%M:%S") # Guardo la hora en un formato que sirva para verse en la respuesta
-                            respuesta = f"{VERDE}[SERVIDOR] La hora actual del servidor es {hora_actual}.{RESET}"
+                            respuesta = f"{YELLOW}[SERVIDOR] La hora actual del servidor es {RESET}{VERDE}{hora_actual}.{RESET}⏰"
                             conn.send(respuesta.encode('utf-8'))
                             continue
 
                         # Si llega un mensaje de chat general (que no empieza con barra /)
-                        respuesta_eco = f"{VERDE}[SERVIDOR ECO]: {mensaje}{RESET}"
+                        respuesta_eco = f"{YELLOW}✅ El SERVIDOR recibio el mensaje.{RESET}"
                         conn.send(respuesta_eco.encode('utf-8'))
                         continue
 
                 else:
                     print(f"{ROJO}[AUTENTICACIÓN FALLIDA] Credenciales incorrectas para '{usuario_cliente}'.{RESET}")
-                    conn.send("Usuario o contraseña incorrectos. Conexión rechazada.\n".encode('utf-8'))
+                    conn.send(f"☠️  {ROJO}Usuario o contraseña incorrectos. Conexión rechazada{RESET}‼️".encode('utf-8'))
                     break
         
             else:
-                conn.send("Error interno: Sin conexión a la base de datos.\n".encode('utf-8'))
+                conn.send("Error interno: Sin conexión a la base de datos.".encode('utf-8'))
                 break
 
         except Exception as e:
@@ -219,7 +221,7 @@ def manejar_cliente(conn, addr, lista_clientes):
             lista_clientes.remove(conn)
 
         # 4. Informo la desconexión en la consola del servidor
-        print(f"\n{VERDE}[DESCONEXIÓN] {addr} se ha ido. Clientes activos: {len(lista_clientes)}{RESET}")
+        print(f"{VERDE}[DESCONEXIÓN] {addr} se ha ido. Clientes activos: {len(lista_clientes)}{RESET}")
 #----------------------------------------------------------------------------------------------------------------------------
 # Funcion utiliza request para manejar comandos de API, almacena los resultados en MySQL.
 def github(comando, conn, db_up, usuario_seleccionado):
@@ -227,12 +229,12 @@ def github(comando, conn, db_up, usuario_seleccionado):
     try:
         # Si el usuario vino vacío o no lo pusieron al lado
         if not usuario_seleccionado:
-            conn.send("Error: Debe ingresar un usuario de GitHub (Ej: /repos octocat).\n".encode('utf-8'))
+            conn.send("Error: Debe ingresar un usuario de GitHub (Ej: /repos octocat).".encode('utf-8'))
             return    
         
         # Si no hay base de datos levantada
         if not db_up:
-            conn.send("Error: No hay conexión con la base de datos.\n".encode('utf-8'))
+            conn.send("Error: No hay conexión con la base de datos.".encode('utf-8'))
             return
 
         # Preparo puente SQL
@@ -262,7 +264,7 @@ def github(comando, conn, db_up, usuario_seleccionado):
                 repositorios = datos_url_repo.json()
 
                 # Parte de arriba intento de tabla guardada para mostrar en consola
-                confirmacion_guardado = f"\n{'~'*50}\n--- REPOSITORIOS DE: {usuario_seleccionado} ---\n"
+                confirmacion_guardado = f"{'~'*50}\n--- REPOSITORIOS DE: {usuario_seleccionado} ---\n"
 
                 # Recorrer cada repositorio, tomar datos e insertarlos en la base de datos
                 for repo in repositorios:
@@ -274,20 +276,20 @@ def github(comando, conn, db_up, usuario_seleccionado):
                     updated_at = repo.get('updated_at', '')
                     
                     # Muestro lo que se encontro y luego se guardo
-                    print(f"Guardando: {name} ({html_url}) (Stars: {stargazers})")
+                    print(f"{CIAN}Guardando:{RESET}{VERDE} {name} ({html_url}) (Stars: {stargazers}){RESET}")
 
                     # Esto inserta en la tabla los valores
                     insertar_repositorio = f" INSERT INTO repositorios (owner, name, html_url, stargazers_count, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s)"
                     # Ejecuto consulta pasandoles los valores que estaban con signo de intrrrogacion
                     cursor.execute(insertar_repositorio, (owner, name, html_url, stargazers, created_at, updated_at))
                     db_up.commit() # saves the changes to the database transaction.
-                    confirmacion_guardado += f"😼-{name}\n   📎-{html_url}\n   💫-Stars:{stargazers}\n   🆙-Actualizado: {updated_at}\n{'-'*50}\n"
+                    confirmacion_guardado += f"\n😼-{name}\n   📎-{html_url}\n   💫-Stars:{stargazers}\n   🆙-Actualizado: {updated_at}\n{'-'*50}"
                 
                 #conn.send(f"El repositorio '{usuario_seleccionado}' y sus datos se guardaron en la base de datos.\n".encode('utf-8'))
                 conn.send(confirmacion_guardado.encode('utf-8'))
 
             else:
-                conn.send(f"Error al consultar repositorios: (CÓDIGO HTTP:{datos_url_repo.status_code})\n".encode('utf-8'))
+                conn.send(f"Error al consultar repositorios: (CÓDIGO HTTP:{datos_url_repo.status_code})".encode('utf-8'))
 
 
         elif comando == "/followers": # Cuando usa el otro comando
@@ -301,7 +303,7 @@ def github(comando, conn, db_up, usuario_seleccionado):
                 followers = datos_url_followers.json()
 
                 #Muestreo de followers
-                f_guardado = f"\n{'~'*50}\n-- Seguidores de: {usuario_seleccionado} --\n"
+                f_guardado = f"{'~'*50}\n-- Seguidores de: {usuario_seleccionado} --\n"
 
                 # Recorrer cada repositorio, tomar datos e insertarlos en la base de datos
                 for f in followers:
@@ -311,7 +313,7 @@ def github(comando, conn, db_up, usuario_seleccionado):
                     type = f.get('type')
 
                     # Muestro lo que se encontro y luego se guardo
-                    print(f"Guardando: {f_name} ({f_html_url}) (Type: {type})")
+                    print(f"{CIAN}Guardando: {RESET}{VERDE}{f_name} ({f_html_url}) (Type: {type}){RESET}")
 
                     # Esto inserta en la tabla los valores
                     insertar_follower = f" INSERT INTO followers (seleccionado, f_name, f_html_url, f_type) VALUES (%s, %s, %s, %s)"
@@ -320,20 +322,20 @@ def github(comando, conn, db_up, usuario_seleccionado):
                     cursor.execute(insertar_follower, (owner, f_name, f_html_url, type))
                     db_up.commit() # saves the changes to the database transaction.
                     
-                    f_guardado += f"😼-{f_name}\n   📎-{f_html_url}\n{'-'*50}\n"
+                    f_guardado += f"\n😼-{f_name}\n   📎-{f_html_url}\n{'-'*50}"
                 
                 #conn.send(f"El repositorio '{usuario_seleccionado}' y sus datos se guardaron en la base de datos.\n".encode('utf-8'))
                 conn.send(f_guardado.encode('utf-8'))
 
             else:
-                conn.send(f"Error al consultar seguidores: (CÓDIGO HTTP{datos_url_followers.status_code})\n".encode('utf-8'))                   
+                conn.send(f"Error al consultar seguidores: (CÓDIGO HTTP{datos_url_followers.status_code})".encode('utf-8'))                   
             
         cursor.close()
 
     except Exception as e:
         print(f"{ROJO}[ERROR EN MÓDULO GITHUB] {e}{RESET}")
         try:
-            conn.send("Ocurrió un error interno en el servidor al procesar la API de GitHub.\n".encode('utf-8'))
+            conn.send("Ocurrió un error interno en el servidor al procesar la API de GitHub.".encode('utf-8'))
         except:
             pass
 
@@ -344,7 +346,7 @@ def chat_servidor():
 
     while True:
 
-        mensaje = input(f"\n{YELLOW}SERVIDOR > {RESET}").strip()
+        mensaje = input(f"🤖 {YELLOW}SERVIDOR > {RESET}").strip()
 
         if not mensaje:
             continue
@@ -366,12 +368,12 @@ def chat_servidor():
             for cliente_socket in list(usuarios_conectados.keys()):
                 try:
                     cliente_socket.sendall(
-                        f"\n{YELLOW}[SERVIDOR]: {texto}{RESET}\n".encode('utf-8')
+                        f"{YELLOW}🤖 [SERVIDOR]: {RESET}{AZUL_SUBRAYADO}{texto}{RESET}".encode('utf-8')
                     )
                 except:
                     pass
 
-            print(f"{YELLOW}[SERVIDOR] Mensaje enviado a todos los clientes.{RESET}")
+            print(f"{YELLOW}🤖 [SERVIDOR] {RESET}{CIAN}Mensaje enviado a todos los clientes.{RESET}")
 
         # Enviar mensaje a un usuario específico (si hay dos usuarios con el mismo nombre falta individualizar por conexion)
         else:
@@ -384,7 +386,7 @@ def chat_servidor():
 
                     try:
                         cliente_socket.sendall(
-                            f"\n{YELLOW}[SERVIDOR PRIVADO]: {texto}{RESET}\n".encode('utf-8')
+                            f"{YELLOW}🤖 [SERVIDOR PRIVADO]: {RESET}{AZUL_SUBRAYADO}{texto}{RESET}".encode('utf-8')
                         )
                         encontrado = True
 
@@ -392,9 +394,9 @@ def chat_servidor():
                         pass
 
             if encontrado: # si lo encontre la variable va a estar en True
-                print(f"{YELLOW}[SERVIDOR] Mensaje enviado a {destinatario}.{RESET}")
+                print(f"{YELLOW}[SERVIDOR] Mensaje enviado a {RESET}{CIAN}{destinatario}.{RESET}")
             else:
-                print(f"{ROJO}[ERROR] El usuario '{destinatario}' no está conectado.{RESET}")
+                print(f"{ROJO}[ERROR] El usuario {RESET}{CIAN}'{destinatario}'{ROJO} no está conectado.{RESET}")
 
 
 #----------------------------------------------------------------------------------------------------------------------------
@@ -426,10 +428,10 @@ def servidorbase():
             hilo = th.Thread(target=manejar_cliente, args=(conn, addr, clientes_activos))
             hilo.start()
             
-            print(f"{VERDE}[CLIENTES ACTIVOS] {len(clientes_activos)}{RESET}")
+            print(f"{VERDE}[CLIENTES ACTIVOS] {RESET}{ROJO_SUBRAYADO}{len(clientes_activos)}{RESET}")
 
     except KeyboardInterrupt:
-        print(f"\n{VERDE}[SERVIDOR DETENIDO] Apagando el servidor de forma segura.{RESET}")
+        print(f"{VERDE}[SERVIDOR DETENIDO] Apagando el servidor de forma segura.{RESET}")
     except ConnectionResetError:
         print(f"{ROJO}[ERROR] Conexión restablecida abruptamente.{RESET}")
     finally:
