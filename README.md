@@ -136,13 +136,13 @@ Una vez autenticado con éxito en el servidor, puedes utilizar los siguientes co
 
 Para probar la consulta y almacenamiento de repositorios y seguidores:
 
-   | Usuario | Comando |
-   |---|---|
-   | octocat | `/repos octocat` |
-   | torvalds | `/repos torvalds` |
-   | python | `/repos python` |
-   | microsoft | `/repos microsoft` |
-   | freeCodeCamp | `/repos freeCodeCamp` |
-   | psf | `/repos psf` |
-   | django | `/repos django` |
-   | pallets | `/repos pallets` |
+   | Usuario | Repos-CMD | Followers-CMD |
+   |---|---|---|
+   | octocat | `/repos octocat` | `/followers octocat` |
+   | torvalds | `/repos torvalds` | `/followers torvalds` |
+   | python | `/repos python` | `/followers python` |
+   | microsoft | `/repos microsoft` | `/followers microsoft` |
+   | freeCodeCamp | `/repos freeCodeCamp` | `/followers freeCodeCamp` |
+   | psf | `/repos psf` | `/followers psf` |
+   | django | `/repos django` | `/followers django` |
+   | pallets | `/repos pallets` | `/followers pallets` |
